@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "tailwindcss": {
+      "source": "hairyf/skills",
+      "sourceType": "github",
+      "computedHash": "78937e1d72496af3e902292eb66b8ad2cdd2d34b90b5428257aae9056678d465"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "61f8c307aa8ce0c4c52da8886d42e344dab83f76f9b5360cf8923b25fb1d67bb"
+    }
+  }
+}
