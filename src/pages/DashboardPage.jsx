@@ -180,21 +180,34 @@ const DashboardPage = () => {
                                     <h2 className="text-xl font-black text-slate-800 tracking-tight uppercase flex items-center gap-3 mb-5">
                                         <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Completed Auctions
                                     </h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         {finalizedSponsorships.map(sp => (
-                                            <div key={sp.id} className="glass-card bg-white border border-emerald-200 p-5 flex items-center justify-between hover:shadow-md transition-all">
-                                                <div className="min-w-0">
-                                                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight truncate">{sp.name}</h4>
-                                                    <p className="text-emerald-600 font-black text-[11px] uppercase tracking-widest mt-0.5 truncate">
-                                                        {sp.currentHighestBidderCompany}
-                                                    </p>
+                                            <div key={sp.id} className="glass-card bg-white border border-emerald-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all duration-300 relative overflow-hidden">
+                                                {/* Allotted badge */}
+                                                <div className="absolute top-5 right-5 flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+                                                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                                                    <span className="text-emerald-600 text-[9px] font-black uppercase tracking-widest">Allotted</span>
                                                 </div>
-                                                <div className="text-right flex-shrink-0 ml-3">
-                                                    <p className="text-blue-700 font-black font-mono text-sm">{formatCurrency(sp.currentHighestBid)}</p>
-                                                    <div className="flex items-center gap-1 mt-1 justify-end">
-                                                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                                        <span className="text-emerald-600 text-[9px] font-black uppercase">Allotted</span>
-                                                    </div>
+
+                                                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-4 pr-20 truncate">{sp.name}</h3>
+
+                                                {/* Final Bid */}
+                                                <div className="mb-5">
+                                                    <p className="label text-slate-400 mb-1">Final Bid</p>
+                                                    <p className="text-3xl font-black font-mono text-blue-700 tracking-tighter">
+                                                        {formatCurrency(sp.currentHighestBid)}
+                                                    </p>
+                                                    {sp.currentHighestBidderCompany && (
+                                                        <p className="text-emerald-600 text-[10px] font-black uppercase tracking-widest mt-1 truncate">
+                                                            🏆 {sp.currentHighestBidderCompany}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* Winner row */}
+                                                <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
+                                                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Winner</span>
+                                                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest truncate ml-2">{sp.currentHighestBidder || '—'}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -223,21 +236,36 @@ const DashboardPage = () => {
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-4 space-y-3">
                                         {recentBids.length > 0 ? (
-                                            recentBids.map((bid, i) => (
-                                                <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 ${i === 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-100 hover:bg-white'}`}>
-                                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center text-white text-[10px] font-black flex-shrink-0">
-                                                        {getInitials(bid.bidder)}
+                                            recentBids.map((bid, i) => {
+                                                const spName = bid.sponsorshipName
+                                                    || sponsorships.find(s => s.id === bid.sponsorshipId)?.name
+                                                    || '—';
+                                                return (
+                                                    <div key={i} className={`p-3 rounded-xl border transition-all duration-200 ${i === 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-100 hover:bg-white'}`}>
+                                                        {/* Top: avatar + company + amount */}
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center text-white text-[10px] font-black flex-shrink-0">
+                                                                {getInitials(bid.bidder)}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-slate-800 text-xs font-black truncate uppercase tracking-tight">{bid.bidderCompany}</p>
+                                                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest truncate">{bid.bidder}</p>
+                                                            </div>
+                                                            <div className="text-right flex-shrink-0">
+                                                                <p className="text-blue-700 text-xs font-black font-mono">₹{bid.amount.toLocaleString()}</p>
+                                                                <p className="text-slate-400 text-[9px] font-black uppercase">{timeAgo(bid.timestamp)}</p>
+                                                            </div>
+                                                        </div>
+                                                        {/* Bottom: bidding on badge */}
+                                                        <div className="mt-2 flex items-center gap-1.5">
+                                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-shrink-0">Bidding on:</span>
+                                                            <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-full text-blue-700 text-[9px] font-black uppercase tracking-widest truncate">
+                                                                {spName}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-slate-800 text-xs font-black truncate uppercase tracking-tight">{bid.bidderCompany}</p>
-                                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest truncate mt-0.5">{bid.sponsorshipName}</p>
-                                                    </div>
-                                                    <div className="text-right flex-shrink-0">
-                                                        <p className="text-blue-700 text-xs font-black font-mono">₹{bid.amount.toLocaleString()}</p>
-                                                        <p className="text-slate-400 text-[9px] font-black uppercase">{timeAgo(bid.timestamp)}</p>
-                                                    </div>
-                                                </div>
-                                            ))
+                                                );
+                                            })
                                         ) : (
                                             <div className="h-full flex flex-col items-center justify-center text-center p-8">
                                                 <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-4">
