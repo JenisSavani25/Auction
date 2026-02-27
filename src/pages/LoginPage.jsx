@@ -21,11 +21,7 @@ export default function LoginPage() {
         if (loginError) clearLoginError();
     };
 
-    const demoAccounts = [
-        { label: 'Admin', username: 'admin', password: 'admin123', color: 'text-gold-500' },
-        { label: 'User 1', username: 'krishna_motors', password: 'pass123', color: 'text-green-400' },
-        { label: 'Dashboard', username: 'dashboard', password: 'dashboard123', color: 'text-purple-400' },
-    ];
+
 
     return (
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
@@ -120,28 +116,6 @@ export default function LoginPage() {
                             )}
                         </button>
                     </form>
-
-                    {/* Demo accounts */}
-                    <div className="mt-6 pt-6 border-t border-slate-100">
-                        <p className="text-xs text-slate-400 font-bold text-center mb-3 uppercase tracking-wider">Quick Access Demo</p>
-                        <div className="grid grid-cols-3 gap-2">
-                            {demoAccounts.map((acc) => (
-                                <button
-                                    key={acc.username}
-                                    type="button"
-                                    onClick={() => {
-                                        setUsername(acc.username);
-                                        setPassword(acc.password);
-                                        clearLoginError();
-                                    }}
-                                    className="py-2 px-3 rounded-lg bg-slate-50 hover:bg-white border border-slate-200 shadow-sm text-center transition-all duration-200 hover:scale-105 hover:border-blue-300 hover:shadow-md"
-                                >
-                                    <p className={`text-xs font-bold ${acc.color === 'text-gold-500' ? 'text-blue-700' : acc.color === 'text-purple-400' ? 'text-purple-600' : 'text-slate-700'}`}>{acc.label}</p>
-                                    <p className="text-slate-500 font-medium text-[10px] mt-0.5 truncate">{acc.username}</p>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
                 </div>
 
                 {/* Bottom info */}

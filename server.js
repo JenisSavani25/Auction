@@ -21,22 +21,10 @@ const io = new Server(httpServer, {
 // INITIAL DATA
 const INITIAL_USERS = [
     { id: 'admin', username: 'admin', password: 'admin123', role: 'admin', companyName: 'Admin Panel', villageName: '', ownerName: 'Super Admin', mobileNumber: '9999999999' },
-    { id: 'user1', username: 'krishna_motors', password: 'pass123', role: 'user', companyName: 'Krishna Motors Pvt Ltd', villageName: 'Shirpur', ownerName: 'Ramesh Patil', mobileNumber: '9876543210' },
-    { id: 'user2', username: 'shivaji_traders', password: 'pass123', role: 'user', companyName: 'Shivaji Traders & Co', villageName: 'Dhule', ownerName: 'Vijay Nikam', mobileNumber: '9765432109' },
-    { id: 'user3', username: 'mauli_enterprises', password: 'pass123', role: 'user', companyName: 'Mauli Enterprises', villageName: 'Nandurbar', ownerName: 'Santosh More', mobileNumber: '9654321098' },
-    { id: 'user4', username: 'samarth_group', password: 'pass123', role: 'user', companyName: 'Samarth Group of Companies', villageName: 'Sakri', ownerName: 'Dinesh Chaudhari', mobileNumber: '9543210987' },
-    { id: 'user5', username: 'jai_hind', password: 'pass123', role: 'user', companyName: 'Jai Hind Industries', villageName: 'Shahada', ownerName: 'Pravin Sonawane', mobileNumber: '9432109876' },
     { id: 'dashboard', username: 'dashboard', password: 'dashboard123', role: 'dashboard', companyName: 'Main Dashboard', villageName: '', ownerName: 'Live Display', mobileNumber: '0000000000' },
 ];
 
-const INITIAL_SPONSORSHIPS = [
-    { id: 'sp1', name: 'Opening Ceremony Title Sponsor', basePrice: 500000, currentHighestBid: 0, currentHighestBidder: null, currentHighestBidderCompany: null, startTime: null, endTime: null, durationMinutes: 10, status: 'UPCOMING', bids: [], description: 'Premium branding at the grand opening ceremony with full stage coverage' },
-    { id: 'sp2', name: 'Main Event Platinum Sponsor', basePrice: 1000000, currentHighestBid: 0, currentHighestBidder: null, currentHighestBidderCompany: null, startTime: null, endTime: null, durationMinutes: 8, status: 'UPCOMING', bids: [], description: 'Exclusive platinum rights with logo on all event materials and media' },
-    { id: 'sp3', name: 'Cultural Night Gold Sponsor', basePrice: 250000, currentHighestBid: 0, currentHighestBidder: null, currentHighestBidderCompany: null, startTime: null, endTime: null, durationMinutes: 5, status: 'UPCOMING', bids: [], description: 'Gold sponsorship for cultural evening with dedicated stage time' },
-    { id: 'sp4', name: 'Sports Day Official Sponsor', basePrice: 150000, currentHighestBid: 0, currentHighestBidder: null, currentHighestBidderCompany: null, startTime: null, endTime: null, durationMinutes: 6, status: 'UPCOMING', bids: [], description: 'Official sponsorship of the sports competition day events' },
-    { id: 'sp5', name: 'Food & Hospitality Partner', basePrice: 200000, currentHighestBid: 0, currentHighestBidder: null, currentHighestBidderCompany: null, startTime: null, endTime: null, durationMinutes: 7, status: 'UPCOMING', bids: [], description: 'Exclusive hospitality and catering rights across all event days' },
-    { id: 'sp6', name: 'Media & Digital Rights Sponsor', basePrice: 300000, currentHighestBid: 0, currentHighestBidder: null, currentHighestBidderCompany: null, startTime: null, endTime: null, durationMinutes: 5, status: 'UPCOMING', bids: [], description: 'Digital streaming and social media exclusive partnership rights' },
-];
+const INITIAL_SPONSORSHIPS = [];
 
 // IN-MEMORY STATE
 let state = {
@@ -62,7 +50,7 @@ async function broadcastState() {
     if (globalStateCollection) {
         try {
             await globalStateCollection.updateOne(
-                { _id: 'global_state' },
+                { _id: 'prod_state' },
                 { $set: { state } },
                 { upsert: true }
             );
@@ -266,14 +254,14 @@ async function startServer() {
             const db = client.db('auction_db');
             globalStateCollection = db.collection('auction_state');
 
-            const savedDoc = await globalStateCollection.findOne({ _id: 'global_state' });
+            const savedDoc = await globalStateCollection.findOne({ _id: 'prod_state' });
             if (savedDoc && savedDoc.state) {
                 // Load the exact state from when the server last shut down/went to sleep
                 state = savedDoc.state;
                 console.log("Successfully loaded live auction state from MongoDB.");
             } else {
                 console.log("No previous state found. Initializing with default hardcoded values.");
-                await globalStateCollection.insertOne({ _id: 'global_state', state });
+                await globalStateCollection.insertOne({ _id: 'prod_state', state });
             }
         } catch (err) {
             console.error("Failed to connect to MongoDB. Running in memory mode.", err);
