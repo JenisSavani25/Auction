@@ -19,137 +19,151 @@ export default function AdminAnalytics() {
     const regularUsers = users.filter((u) => u.role !== 'admin');
 
     const overviewStats = [
-        { label: 'Confirmed Revenue', value: formatCurrency(totalRevenue), icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
-        { label: 'Potential Revenue', value: formatCurrency(potentialRevenue), icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-100' },
-        { label: 'Total Bids', value: totalBids, icon: Gavel, color: 'text-yellow-600', bg: 'bg-yellow-100' },
-        { label: 'Active Bidders', value: regularUsers.length, icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
-        { label: 'Completed Auctions', value: allotedSponsors.length, icon: CheckCircle, color: 'text-blue-600', bg: 'bg-blue-100' },
+        { label: 'Total Revenue', value: formatCurrency(totalRevenue), icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+        { label: 'Potential Revenue', value: formatCurrency(potentialRevenue), icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { label: 'Total Bids Placed', value: totalBids, icon: Gavel, color: 'text-amber-600', bg: 'bg-amber-50' },
+        { label: 'Active Sponsors', value: regularUsers.length, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+        { label: 'Completed Lots', value: allotedSponsors.length, icon: CheckCircle, color: 'text-sky-600', bg: 'bg-sky-50' },
         {
-            label: 'Avg. Bid Size',
+            label: 'Avg. Bid Per Lot',
             value: totalBids > 0 ? formatCurrency(Math.round(
                 sponsorships.flatMap((s) => s.bids).reduce((sum, b) => sum + b.amount, 0) / totalBids
             )) : '—',
             icon: BarChart3,
-            color: 'text-orange-600',
-            bg: 'bg-orange-100',
+            color: 'text-violet-600',
+            bg: 'bg-violet-50',
         },
     ];
 
     return (
-        <div className="space-y-6">
-            <h2 className="section-title text-xl text-slate-800">Analytics & Revenue</h2>
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            {/* Intel Tier */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Auction Analytics</h2>
+                    <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.2em] mt-1">Detailed breakdown of revenue & sponsor engagement</p>
+                </div>
+            </div>
 
-            {/* Overview stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                {overviewStats.map((stat) => (
-                    <div key={stat.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all duration-200">
-                        <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center mb-3 shadow-inner`}>
-                            <stat.icon className={`w-5 h-5 ${stat.color}`} />
+            {/* Metric Grids */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {overviewStats.map((stat, i) => (
+                    <div key={stat.label} className="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-500 group animate-in zoom-in-95" style={{ animationDelay: `${i * 50}ms` }}>
+                        <div className={`w-14 h-14 rounded-2xl ${stat.bg} flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform`}>
+                            <stat.icon className={`w-6 h-6 ${stat.color}`} />
                         </div>
-                        <p className={`text-2xl font-black font-mono tracking-tight ${stat.color}`}>{stat.value}</p>
-                        <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-1">{stat.label}</p>
+                        <p className={`text-4xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.value}</p>
+                        <p className="text-slate-400 font-black uppercase tracking-[0.2em] text-[10px] mt-2">{stat.label}</p>
                     </div>
                 ))}
             </div>
 
-            {/* Sponsorship breakdown table */}
-            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl p-5">
-                <h3 className="text-slate-800 font-black tracking-tight mb-4 uppercase text-sm">Sponsorship Revenue Breakdown</h3>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-slate-200">
-                                <th className="text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 pb-3 pr-4">Sponsorship</th>
-                                <th className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-400 pb-3 px-4">Base Price</th>
-                                <th className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-400 pb-3 px-4">Final Bid</th>
-                                <th className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-400 pb-3 px-4">Uplift</th>
-                                <th className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-400 pb-3 pl-4">Winner</th>
-                            </tr>
-                        </thead>
-                        <tbody className="space-y-2">
-                            {sponsorships.map((sp) => {
-                                const uplift = sp.currentHighestBid > sp.basePrice
-                                    ? (((sp.currentHighestBid - sp.basePrice) / sp.basePrice) * 100).toFixed(0)
-                                    : null;
-                                return (
-                                    <tr key={sp.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                                        <td className="py-3 pr-4">
-                                            <p className="text-slate-800 text-sm font-bold">{sp.name}</p>
-                                            <span className={`text-[10px] uppercase font-black tracking-widest ${sp.status === 'OPEN' ? 'text-green-600' :
-                                                sp.status === 'ALLOTED' ? 'text-blue-600' :
-                                                    sp.status === 'REJECTED' ? 'text-red-500' : 'text-slate-500'
-                                                }`}>{sp.status}</span>
-                                        </td>
-                                        <td className="py-3 px-4 text-right text-slate-600 font-mono text-sm">{formatCurrency(sp.basePrice)}</td>
-                                        <td className="py-3 px-4 text-right">
-                                            <span className={`text-sm font-black font-mono ${sp.currentHighestBid > 0 ? 'text-blue-700' : 'text-slate-400'}`}>
-                                                {sp.currentHighestBid > 0 ? formatCurrency(sp.currentHighestBid) : '—'}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-4 text-right">
-                                            {uplift ? (
-                                                <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs font-bold border border-green-200">+{uplift}%</span>
-                                            ) : (
-                                                <span className="text-slate-300 text-xs font-bold">—</span>
-                                            )}
-                                        </td>
-                                        <td className="py-3 pl-4 text-right">
-                                            {sp.currentHighestBidderCompany ? (
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    {sp.status === 'ALLOTED' && <Crown className="w-3.5 h-3.5 text-yellow-500 drop-shadow-sm" />}
-                                                    <span className="text-slate-700 font-bold text-xs truncate max-w-24">{sp.currentHighestBidderCompany}</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-slate-400 font-semibold text-[10px] uppercase tracking-widest">No bids</span>
-                                            )}
-                                        </td>
+            {/* Data Tables */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                {/* Revenue Breakdown */}
+                <div className="xl:col-span-8 space-y-6">
+                    <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                            <h3 className="text-slate-900 font-black text-sm uppercase tracking-tight">Revenue Breakdown</h3>
+                            <div className="px-4 py-1.5 bg-white rounded-full border border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                Total: {sponsorships.length} Lots
+                            </div>
+                        </div>
+                        <div className="overflow-x-auto no-scrollbar">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-slate-50 bg-white">
+                                        <th className="text-left text-[9px] font-black uppercase tracking-widest text-slate-400 p-8">Sponsorship Lot</th>
+                                        <th className="text-right text-[9px] font-black uppercase tracking-widest text-slate-400 p-8">Reserve Price</th>
+                                        <th className="text-right text-[9px] font-black uppercase tracking-widest text-slate-400 p-8">Highest Bid</th>
+                                        <th className="text-right text-[9px] font-black uppercase tracking-widest text-slate-400 p-8">Growth</th>
+                                        <th className="text-right text-[9px] font-black uppercase tracking-widest text-slate-400 p-8">Current Owner</th>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                        <tfoot>
-                            <tr className="border-t border-slate-200">
-                                <td className="pt-4 pr-4 text-slate-500 text-[10px] font-black uppercase tracking-widest">TOTAL</td>
-                                <td className="pt-4 px-4 text-right text-slate-600 text-sm font-bold font-mono">
-                                    {formatCurrency(sponsorships.reduce((s, sp) => s + sp.basePrice, 0))}
-                                </td>
-                                <td className="pt-4 px-4 text-right text-blue-700 text-sm font-black font-mono">
-                                    {formatCurrency(sponsorships.reduce((s, sp) => s + sp.currentHighestBid, 0))}
-                                </td>
-                                <td colSpan={2} />
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-
-            {/* Leaderboard */}
-            {leaderboard.length > 0 && (
-                <div className="bg-white shadow-sm border border-slate-200 rounded-2xl p-5">
-                    <h3 className="text-slate-800 font-black tracking-tight mb-4 uppercase text-sm">Company Leaderboard</h3>
-                    <div className="space-y-3">
-                        {leaderboard.map((entry, index) => {
-                            const rank = index + 1;
-                            const RANK_ICONS = { 1: '🥇', 2: '🥈', 3: '🥉' };
-                            return (
-                                <div key={entry.company} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200 transition-colors">
-                                    <span className="text-2xl w-8 text-center flex-shrink-0 drop-shadow-sm">{RANK_ICONS[rank] || <span className="text-slate-400 font-black text-lg">#{rank}</span>}</span>
-                                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-700 text-sm font-black border border-slate-200 shadow-sm flex-shrink-0">
-                                        {getInitials(entry.company)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-slate-800 text-sm font-bold truncate">{entry.company}</p>
-                                        <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-0.5">{entry.bidCount} bids placed</p>
-                                    </div>
-                                    <p className={`text-base font-black font-mono flex-shrink-0 ${rank === 1 ? 'text-blue-700' : 'text-slate-600'}`}>
-                                        {formatCurrency(entry.total)}
-                                    </p>
-                                </div>
-                            );
-                        })}
+                                </thead>
+                                <tbody>
+                                    {sponsorships.map((sp) => {
+                                        const uplift = sp.currentHighestBid > sp.basePrice
+                                            ? (((sp.currentHighestBid - sp.basePrice) / sp.basePrice) * 100).toFixed(0)
+                                            : null;
+                                        return (
+                                            <tr key={sp.id} className="group hover:bg-slate-50 transition-colors">
+                                                <td className="p-8">
+                                                    <p className="text-slate-900 font-black text-sm uppercase tracking-tight">{sp.name}</p>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className={`w-2 h-2 rounded-full ${sp.status === 'ALLOTED' ? 'bg-blue-500' : sp.status === 'OPEN' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                                                        <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">{sp.status}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-8 text-right text-slate-500 font-mono font-bold text-sm">{formatCurrency(sp.basePrice)}</td>
+                                                <td className="p-8 text-right">
+                                                    <span className={`text-base font-black font-mono tracking-tighter ${sp.currentHighestBid > 0 ? 'text-blue-700' : 'text-slate-300'}`}>
+                                                        {sp.currentHighestBid > 0 ? formatCurrency(sp.currentHighestBid) : '—'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-8 text-right">
+                                                    {uplift ? (
+                                                        <span className="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl text-[10px] font-black border border-emerald-100 uppercase tracking-widest">+{uplift}% Gain</span>
+                                                    ) : (
+                                                        <span className="text-slate-300 text-[10px] font-black uppercase tracking-widest">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="p-8 text-right">
+                                                    {sp.currentHighestBidderCompany ? (
+                                                        <div className="flex items-center justify-end gap-3">
+                                                            <div className="text-right">
+                                                                <p className="text-slate-900 font-black text-xs uppercase truncate max-w-[120px]">{sp.currentHighestBidderCompany}</p>
+                                                                <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">AUTHORIZED</p>
+                                                            </div>
+                                                            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white text-[10px] font-black border-2 border-white shadow-lg">
+                                                                {getInitials(sp.currentHighestBidderCompany)}
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-slate-200 font-black text-[9px] uppercase tracking-widest">Vacant Node</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            )}
+
+                {/* Performance Rankings */}
+                <div className="xl:col-span-4 space-y-6">
+                    <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm p-10 flex flex-col h-full overflow-hidden relative">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-50 transition-colors duration-500" />
+
+                        <div className="relative z-10 mb-10 pb-6 border-b border-slate-100">
+                            <h3 className="text-slate-900 font-black text-sm uppercase tracking-tight">Top Investors</h3>
+                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Capital Investment Leaders</p>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 relative z-10">
+                            {leaderboard.map((entry, index) => {
+                                const rank = index + 1;
+                                return (
+                                    <div key={entry.company} className="group flex items-center gap-5 p-5 rounded-[2rem] border border-slate-50 bg-slate-50/50 hover:bg-white hover:border-blue-100 hover:shadow-xl transition-all duration-500">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-inner border-2 ${rank === 1 ? 'bg-yellow-50 text-yellow-600 border-yellow-100 shadow-yellow-100/50' : 'bg-white text-slate-300 border-slate-100'}`}>
+                                            {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-slate-900 font-black text-[13px] uppercase tracking-tight truncate">{entry.company}</p>
+                                            <p className="text-slate-400 font-black uppercase tracking-widest text-[9px] mt-1">{entry.bidCount} Engagement signals</p>
+                                        </div>
+                                        <p className={`text-sm font-black font-mono tracking-tighter ${rank === 1 ? 'text-blue-700' : 'text-slate-600'}`}>
+                                            {formatCurrency(entry.total)}
+                                        </p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
+

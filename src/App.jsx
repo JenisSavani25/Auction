@@ -4,7 +4,9 @@ import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import UserPage from './pages/UserPage';
 import DashboardPage from './pages/DashboardPage';
+import SupporterPage from './pages/SupporterPage';
 import WinnerModal from './components/modals/WinnerModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function AppRouter() {
     const { currentUser } = useAuction();
@@ -17,6 +19,8 @@ function AppRouter() {
                 <AdminPage />
             ) : currentUser.role === 'dashboard' ? (
                 <DashboardPage />
+            ) : currentUser.role === 'supporter' ? (
+                <SupporterPage />
             ) : (
                 <UserPage />
             )}
@@ -27,8 +31,10 @@ function AppRouter() {
 
 export default function App() {
     return (
-        <AuctionProvider>
-            <AppRouter />
-        </AuctionProvider>
+        <ErrorBoundary>
+            <AuctionProvider>
+                <AppRouter />
+            </AuctionProvider>
+        </ErrorBoundary>
     );
 }

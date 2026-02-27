@@ -35,10 +35,11 @@ let state = {
     teamAuction: {
         status: 'NOT_STARTED', // NOT_STARTED, ROUND_ACTIVE, ROUND_STOPPED, ASSIGNING, INAUGURATION
         currentPrice: 50000,
-        roundNumber: 1,
+        roundNumber: 0,
         interestedBidders: [],
         winners: [],
         assignments: [],
+        history: [],
     }
 };
 
@@ -50,7 +51,7 @@ async function broadcastState() {
     if (globalStateCollection) {
         try {
             await globalStateCollection.updateOne(
-                { _id: 'prod_state' },
+                { _id: 'global_state' },
                 { $set: { state } },
                 { upsert: true }
             );
@@ -75,7 +76,11 @@ io.on('connection', (socket) => {
                 // Do login securely on backend if needed, but for now just validation
                 break;
             case 'CREATE_USER':
-                state.users.push({ ...action.user, id: `user_${Date.now()}`, role: 'user' });
+                state.users.push({
+                    ...action.user,
+                    id: `user_${Date.now()}`,
+                    role: action.user.role || 'user'
+                });
                 break;
             case 'DELETE_USER':
                 state.users = state.users.filter(u => u.id !== action.userId);
@@ -107,38 +112,51 @@ io.on('connection', (socket) => {
                 );
                 break;
             case 'PLACE_BID': {
-                const { sponsorshipId, bidAmount, bidder, bidderCompany } = action;
+                // actingAs is set when a supporter places bid on behalf of a sponsor
+                const { sponsorshipId, bidAmount, bidder, bidderCompany, actingAs } = action;
+                const effectiveBidder = actingAs ? actingAs.ownerName : bidder;
+                const effectiveBidderCompany = actingAs ? actingAs.companyName : bidderCompany;
                 const now = Date.now();
                 const bid = {
                     id: `bid_${now}`,
                     sponsorshipId,
                     amount: bidAmount,
-                    bidder,
-                    bidderCompany,
+                    bidder: effectiveBidder,
+                    bidderCompany: effectiveBidderCompany,
+                    sponsorshipName: state.sponsorships.find(s => s.id === sponsorshipId)?.name || '',
                     timestamp: now,
                 };
 
                 state.sponsorships = state.sponsorships.map(sp => {
                     if (sp.id !== sponsorshipId) return sp;
-                    // RESET TIMER: current_time + bid_timer_duration (in minutes)
                     const newEndTime = now + (sp.durationMinutes * 60 * 1000);
                     return {
                         ...sp,
                         currentHighestBid: bidAmount,
-                        currentHighestBidder: bidder,
-                        currentHighestBidderCompany: bidderCompany,
-                        endTime: newEndTime, // RESET TIMER
+                        currentHighestBidder: effectiveBidder,
+                        currentHighestBidderCompany: effectiveBidderCompany,
+                        endTime: newEndTime,
                         bids: [bid, ...sp.bids],
                     };
                 });
                 state.recentBids = [bid, ...state.recentBids].slice(0, 50);
                 break;
             }
-            case 'ALLOT_AUCTION':
-                state.sponsorships = state.sponsorships.map(sp =>
-                    sp.id === action.sponsorshipId ? { ...sp, status: 'ALLOTED' } : sp
-                );
+            case 'ALLOT_AUCTION': {
+                const sp = state.sponsorships.find(s => s.id === action.sponsorshipId);
+                if (sp) {
+                    sp.status = 'ALLOTED';
+                    if (sp.currentHighestBidder) {
+                        state.winnerModal = {
+                            sponsorshipName: sp.name,
+                            winner: sp.currentHighestBidder,
+                            winnerCompany: sp.currentHighestBidderCompany,
+                            amount: sp.currentHighestBid,
+                        };
+                    }
+                }
                 break;
+            }
             case 'SHOW_WINNER_MODAL':
                 state.winnerModal = action.data;
                 break;
@@ -171,13 +189,20 @@ io.on('connection', (socket) => {
                 break;
             case 'TEAM_STOP_ROUND':
                 state.teamAuction.status = 'ROUND_STOPPED';
+                state.teamAuction.history.push({
+                    round: state.teamAuction.roundNumber,
+                    price: state.teamAuction.currentPrice,
+                    interestedBidders: state.teamAuction.interestedBidders.length
+                });
                 break;
             case 'TEAM_TOGGLE_INTEREST': {
-                const isInterested = state.teamAuction.interestedBidders.some(b => b.id === action.user.id);
+                // targetUser: the actual sponsor (used when supporter acts on behalf)
+                const targetUser = action.targetUser || action.user;
+                const isInterested = state.teamAuction.interestedBidders.some(b => b.id === targetUser.id);
                 if (isInterested) {
-                    state.teamAuction.interestedBidders = state.teamAuction.interestedBidders.filter(b => b.id !== action.user.id);
+                    state.teamAuction.interestedBidders = state.teamAuction.interestedBidders.filter(b => b.id !== targetUser.id);
                 } else {
-                    state.teamAuction.interestedBidders.push(action.user);
+                    state.teamAuction.interestedBidders.push(targetUser);
                 }
                 break;
             }
@@ -195,10 +220,11 @@ io.on('connection', (socket) => {
                 state.teamAuction = {
                     status: 'NOT_STARTED',
                     currentPrice: 50000,
-                    roundNumber: 1,
+                    roundNumber: 0,
                     interestedBidders: [],
                     winners: [],
-                    assignments: []
+                    assignments: [],
+                    history: []
                 };
                 break;
             default:
@@ -215,32 +241,11 @@ io.on('connection', (socket) => {
     });
 });
 
-// Auto-allot expired auctions loop on backend
+// Auto-allot check removed as per user request (Manual completion required)
 setInterval(() => {
-    let changed = false;
-    const now = Date.now();
-    state.sponsorships.forEach(sp => {
-        if (sp.status === 'OPEN' && sp.endTime && now >= sp.endTime) {
-            sp.status = 'ALLOTED'; // Auto switch to allotted
-
-            // Show winner modal globally if there was a bidder
-            if (sp.currentHighestBidder) {
-                state.winnerModal = {
-                    sponsorshipName: sp.name,
-                    winner: sp.currentHighestBidder,
-                    winnerCompany: sp.currentHighestBidderCompany,
-                    amount: sp.currentHighestBid,
-                };
-            }
-            changed = true;
-            console.log(`Auction ${sp.name} auto-allotted!`);
-        }
-    });
-
-    if (changed) {
-        broadcastState();
-    }
-}, 1000); // Check every second
+    // We only keep the interval to broadcast a heartbeat if needed or handle other periodic tasks
+    // Auto-allotment is now handled manually via 'ALLOT_AUCTION' action
+}, 5000);
 
 const PORT = process.env.PORT || 3001;
 
@@ -254,20 +259,29 @@ async function startServer() {
             const db = client.db('auction_db');
             globalStateCollection = db.collection('auction_state');
 
-            const savedDoc = await globalStateCollection.findOne({ _id: 'prod_state' });
+            // Clean up old prod_state document if exists
+            await globalStateCollection.deleteOne({ _id: 'prod_state' });
+            console.log("Old prod_state document removed (if existed).");
+
+            // Try to load from global_state
+            const savedDoc = await globalStateCollection.findOne({ _id: 'global_state' });
             if (savedDoc && savedDoc.state) {
-                // Load the exact state from when the server last shut down/went to sleep
                 state = savedDoc.state;
-                console.log("Successfully loaded live auction state from MongoDB.");
+                // Ensure admin and dashboard users always exist
+                const hasAdmin = state.users.some(u => u.id === 'admin');
+                const hasDashboard = state.users.some(u => u.id === 'dashboard');
+                if (!hasAdmin) state.users.unshift(INITIAL_USERS[0]);
+                if (!hasDashboard) state.users.push(INITIAL_USERS[1]);
+                console.log("Loaded state from MongoDB (global_state).");
             } else {
-                console.log("No previous state found. Initializing with default hardcoded values.");
-                await globalStateCollection.insertOne({ _id: 'prod_state', state });
+                console.log("No global_state found. Starting fresh.");
+                await globalStateCollection.insertOne({ _id: 'global_state', state });
             }
         } catch (err) {
             console.error("Failed to connect to MongoDB. Running in memory mode.", err);
         }
     } else {
-        console.log("No MONGO_URI found in environment limits. Running with in-memory state only.");
+        console.log("No MONGO_URI found. Running with in-memory state only.");
     }
 
     httpServer.listen(PORT, () => {

@@ -8,7 +8,15 @@ const AuctionContext = createContext(null);
 
 export function AuctionProvider({ children }) {
     const [globalState, setGlobalState] = useState(null);
-    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState(() => {
+        try {
+            const saved = localStorage.getItem('auction_user');
+            return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+            console.error("Failed to parse saved user:", e);
+            return null;
+        }
+    });
     const [loginError, setLoginError] = useState(null);
 
     useEffect(() => {
@@ -21,6 +29,8 @@ export function AuctionProvider({ children }) {
         };
     }, []);
 
+
+
     const login = useCallback((username, password) => {
         if (!globalState) return;
         const user = globalState.users.find(
@@ -30,12 +40,30 @@ export function AuctionProvider({ children }) {
             setLoginError('Invalid username or password');
         } else {
             setCurrentUser(user);
+            localStorage.setItem('auction_user', JSON.stringify(user));
             setLoginError(null);
         }
     }, [globalState]);
 
-    const logout = useCallback(() => setCurrentUser(null), []);
+    const logout = useCallback(() => {
+        setCurrentUser(null);
+        localStorage.removeItem('auction_user');
+    }, []);
     const clearLoginError = useCallback(() => setLoginError(null), []);
+
+    // Sync persisted user with global state
+    useEffect(() => {
+        if (globalState && currentUser && currentUser.role !== 'admin') {
+            const userExists = globalState.users.find(u => u.id === currentUser.id);
+            if (!userExists) {
+                logout();
+            } else if (JSON.stringify(userExists) !== JSON.stringify(currentUser)) {
+                // Update local user info if changed (e.g. company name updated)
+                setCurrentUser(userExists);
+                localStorage.setItem('auction_user', JSON.stringify(userExists));
+            }
+        }
+    }, [globalState, currentUser, logout]);
 
     // Server action dispatcher
     const dispatchAction = useCallback((action) => {
@@ -46,9 +74,13 @@ export function AuctionProvider({ children }) {
     const deleteUser = useCallback((userId) => dispatchAction({ type: 'DELETE_USER', userId }), [dispatchAction]);
     const createSponsorship = useCallback((sponsorship) => dispatchAction({ type: 'CREATE_SPONSORSHIP', sponsorship }), [dispatchAction]);
     const startAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'START_AUCTION', sponsorshipId }), [dispatchAction]);
+    const allotAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'ALLOT_AUCTION', sponsorshipId }), [dispatchAction]);
     const rejectAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'REJECT_AUCTION', sponsorshipId }), [dispatchAction]);
     const placeBid = useCallback((sponsorshipId, bidAmount, bidder, bidderCompany) =>
         dispatchAction({ type: 'PLACE_BID', sponsorshipId, bidAmount, bidder, bidderCompany }), [dispatchAction]);
+    // Supporter version: places bid credited to the sponsor (actingAs)
+    const placeBidAs = useCallback((sponsorshipId, bidAmount, actingAs) =>
+        dispatchAction({ type: 'PLACE_BID', sponsorshipId, bidAmount, bidder: null, bidderCompany: null, actingAs }), [dispatchAction]);
     const closeWinnerModal = useCallback(() => dispatchAction({ type: 'CLOSE_WINNER_MODAL' }), [dispatchAction]);
     const extendTimer = useCallback((sponsorshipId, minutes) => dispatchAction({ type: 'EXTEND_TIMER', sponsorshipId, minutes }), [dispatchAction]);
     const updateDuration = useCallback((sponsorshipId, minutes) => dispatchAction({ type: 'UPDATE_DURATION', sponsorshipId, minutes }), [dispatchAction]);
@@ -57,6 +89,8 @@ export function AuctionProvider({ children }) {
     const startTeamRound = useCallback((price, newRound) => dispatchAction({ type: 'TEAM_START_ROUND', price, newRound }), [dispatchAction]);
     const stopTeamRound = useCallback(() => dispatchAction({ type: 'TEAM_STOP_ROUND' }), [dispatchAction]);
     const toggleTeamInterest = useCallback((user) => dispatchAction({ type: 'TEAM_TOGGLE_INTEREST', user }), [dispatchAction]);
+    // Supporter version: toggles a specific sponsor's interest
+    const toggleTeamInterestAs = useCallback((targetUser) => dispatchAction({ type: 'TEAM_TOGGLE_INTEREST', targetUser }), [dispatchAction]);
     const finalizeTeamWinners = useCallback(() => dispatchAction({ type: 'TEAM_FINALIZE_WINNERS' }), [dispatchAction]);
     const saveTeamAssignments = useCallback((assignments) => dispatchAction({ type: 'TEAM_SAVE_ASSIGNMENTS', assignments }), [dispatchAction]);
     const announceTeams = useCallback(() => dispatchAction({ type: 'TEAM_ANNOUNCE' }), [dispatchAction]);
@@ -95,8 +129,10 @@ export function AuctionProvider({ children }) {
         deleteUser,
         createSponsorship,
         startAuction,
+        allotAuction,
         rejectAuction,
         placeBid,
+        placeBidAs,
         closeWinnerModal,
         extendTimer,
         updateDuration,
@@ -104,6 +140,7 @@ export function AuctionProvider({ children }) {
         startTeamRound,
         stopTeamRound,
         toggleTeamInterest,
+        toggleTeamInterestAs,
         finalizeTeamWinners,
         saveTeamAssignments,
         announceTeams,

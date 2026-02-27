@@ -10,7 +10,7 @@ export default function UserManager() {
     const [showCreate, setShowCreate] = useState(false);
     const [showPasswords, setShowPasswords] = useState({});
     const [form, setForm] = useState({
-        username: '', password: '', companyName: '', villageName: '', ownerName: '', mobileNumber: ''
+        username: '', password: '', companyName: '', villageName: '', ownerName: '', mobileNumber: '', role: 'user'
     });
     const [formError, setFormError] = useState('');
 
@@ -20,14 +20,16 @@ export default function UserManager() {
         e.preventDefault();
         if (!form.username.trim()) { setFormError('Username is required'); return; }
         if (!form.password.trim()) { setFormError('Password is required'); return; }
-        if (!form.companyName.trim()) { setFormError('Company name is required'); return; }
-        if (!form.ownerName.trim()) { setFormError('Owner name is required'); return; }
+        if (form.role === 'user') {
+            if (!form.companyName.trim()) { setFormError('Company name is required'); return; }
+            if (!form.ownerName.trim()) { setFormError('Owner name is required'); return; }
+        }
         if (users.find((u) => u.username === form.username.trim())) {
-            setFormError('Username already exists');
+            setFormError('Username already taken');
             return;
         }
         createUser({ ...form, username: form.username.trim() });
-        setForm({ username: '', password: '', companyName: '', villageName: '', ownerName: '', mobileNumber: '' });
+        setForm({ username: '', password: '', companyName: '', villageName: '', ownerName: '', mobileNumber: '', role: 'user' });
         setFormError('');
         setShowCreate(false);
     };
@@ -37,114 +39,123 @@ export default function UserManager() {
     };
 
     return (
-        <div className="space-y-5 bg-transparent">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                    <h2 className="section-title text-xl text-slate-800">User Management</h2>
-                    <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black tracking-widest uppercase shadow-sm">
-                        {regularUsers.length} users
-                    </span>
+        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            {/* Control Tier */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Sponsor Directory</h2>
+                    <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.2em] mt-0.5">Registered participants: {regularUsers.length}</p>
                 </div>
                 <button
                     onClick={() => setShowCreate((v) => !v)}
-                    className="btn-primary flex items-center gap-2 shadow-md"
+                    className="px-5 py-2.5 bg-slate-900 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-all shadow-md active:scale-95 flex items-center gap-2"
                     id="create-user-btn"
                 >
-                    <Plus className="w-4 h-4" />
-                    Add User
+                    <Plus className="w-5 h-5" />
+                    Add New Sponsor
                 </button>
             </div>
 
-            {/* Create form */}
+            {/* Entity Onboarding */}
             {showCreate && (
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md animate-slide-in">
-                    <h3 className="text-slate-800 font-black tracking-tight mb-4 flex items-center gap-2 uppercase">
-                        <Plus className="w-4 h-4 text-blue-600" />
-                        Create New User
-                    </h3>
-                    <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                            <label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest" htmlFor="u-username">Username *</label>
+                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-md animate-in zoom-in-95 duration-300">
+                    <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Role Selector — full width */}
+                        <div className="md:col-span-2 lg:col-span-3 flex items-center gap-3">
+                            <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Account Type:</span>
+                            {['user', 'supporter'].map(r => (
+                                <button
+                                    key={r}
+                                    type="button"
+                                    onClick={() => setForm(f => ({ ...f, role: r }))}
+                                    className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${form.role === r
+                                            ? r === 'supporter' ? 'bg-amber-500 border-amber-500 text-white' : 'bg-blue-700 border-blue-700 text-white'
+                                            : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
+                                        }`}
+                                >
+                                    {r === 'supporter' ? '⚡ Supporter' : '🏢 Sponsor'}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Login Username *</label>
                             <input
-                                id="u-username"
                                 type="text"
                                 value={form.username}
                                 onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
-                                placeholder="e.g. krishna_motors"
-                                className="input-field bg-slate-50 border-slate-200 text-slate-800 focus:bg-white"
+                                placeholder="Unique ID..."
+                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-black text-sm placeholder-slate-300 focus:outline-none focus:border-blue-500 transition-all"
                                 autoComplete="off"
                             />
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest" htmlFor="u-password">Password *</label>
+                        <div className="space-y-2">
+                            <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Login Password *</label>
                             <input
-                                id="u-password"
                                 type="text"
                                 value={form.password}
                                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                                placeholder="Set login password"
-                                className="input-field bg-slate-50 border-slate-200 text-slate-800 focus:bg-white"
+                                placeholder="Secret..."
+                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-black text-sm placeholder-slate-300 focus:outline-none focus:border-blue-500 transition-all"
                                 autoComplete="off"
                             />
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest" htmlFor="u-company">Company Name *</label>
-                            <input
-                                id="u-company"
-                                type="text"
-                                value={form.companyName}
-                                onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
-                                placeholder="e.g. Krishna Motors Pvt Ltd"
-                                className="input-field bg-slate-50 border-slate-200 text-slate-800 focus:bg-white"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest" htmlFor="u-village">Village Name</label>
-                            <input
-                                id="u-village"
-                                type="text"
-                                value={form.villageName}
-                                onChange={(e) => setForm((f) => ({ ...f, villageName: e.target.value }))}
-                                placeholder="e.g. Shirpur"
-                                className="input-field bg-slate-50 border-slate-200 text-slate-800 focus:bg-white"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest" htmlFor="u-owner">Owner Name *</label>
-                            <input
-                                id="u-owner"
-                                type="text"
-                                value={form.ownerName}
-                                onChange={(e) => setForm((f) => ({ ...f, ownerName: e.target.value }))}
-                                placeholder="e.g. Ramesh Patil"
-                                className="input-field bg-slate-50 border-slate-200 text-slate-800 focus:bg-white"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest" htmlFor="u-mobile">Mobile Number</label>
-                            <input
-                                id="u-mobile"
-                                type="tel"
-                                value={form.mobileNumber}
-                                onChange={(e) => setForm((f) => ({ ...f, mobileNumber: e.target.value }))}
-                                placeholder="e.g. 9876543210"
-                                className="input-field bg-slate-50 border-slate-200 text-slate-800 focus:bg-white"
-                            />
-                        </div>
+                        {/* Company / Owner / Village / Mobile — only for sponsors */}
+                        {form.role === 'user' && (
+                            <>
+                                <div className="space-y-2">
+                                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Company Name *</label>
+                                    <input
+                                        type="text"
+                                        value={form.companyName}
+                                        onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
+                                        placeholder="Company Name..."
+                                        className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-black text-sm placeholder-slate-300 focus:outline-none focus:border-blue-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Village Name</label>
+                                    <input
+                                        type="text"
+                                        value={form.villageName}
+                                        onChange={(e) => setForm((f) => ({ ...f, villageName: e.target.value }))}
+                                        placeholder="Locality..."
+                                        className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-black text-sm placeholder-slate-300 focus:outline-none focus:border-blue-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Owner Full Name *</label>
+                                    <input
+                                        type="text"
+                                        value={form.ownerName}
+                                        onChange={(e) => setForm((f) => ({ ...f, ownerName: e.target.value }))}
+                                        placeholder="Full Name..."
+                                        className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-black text-sm placeholder-slate-300 focus:outline-none focus:border-blue-500 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Mobile Number</label>
+                                    <input
+                                        type="tel"
+                                        value={form.mobileNumber}
+                                        onChange={(e) => setForm((f) => ({ ...f, mobileNumber: e.target.value }))}
+                                        placeholder="Mobile..."
+                                        className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-black text-sm placeholder-slate-300 focus:outline-none focus:border-blue-500 transition-all"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         {formError && (
-                            <div className="sm:col-span-2 flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 text-sm font-bold mt-2">
-                                <AlertTriangle className="w-4 h-4" />
-                                {formError}
+                            <div className="md:col-span-2 lg:col-span-3 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-xs font-black uppercase tracking-widest">
+                                <AlertTriangle className="w-4 h-4" /> {formError}
                             </div>
                         )}
 
-                        <div className="sm:col-span-2 flex gap-3 mt-2">
-                            <button type="submit" className="btn-primary flex items-center gap-2 shadow-sm">
-                                <Plus className="w-4 h-4" />
-                                Create User
+                        <div className="md:col-span-2 lg:col-span-3 flex gap-3 pt-2">
+                            <button type="submit" className="px-6 py-2.5 bg-blue-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-blue-800 transition-all shadow-md active:scale-95">
+                                Add Sponsor
                             </button>
-                            <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary bg-white text-slate-600 border border-slate-300 hover:bg-slate-50 shadow-sm font-bold">
+                            <button type="button" onClick={() => setShowCreate(false)} className="px-6 py-2.5 bg-white text-slate-400 border border-slate-200 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-slate-50 transition-all">
                                 Cancel
                             </button>
                         </div>
@@ -152,75 +163,89 @@ export default function UserManager() {
                 </div>
             )}
 
-            {/* User list */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Profile Matrix */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {regularUsers.map((user) => (
-                    <div key={user.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all duration-200 hover:-translate-y-0.5">
-                        {/* User header */}
-                        <div className="flex items-start justify-between gap-3 mb-4 border-b border-slate-100 pb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 font-black text-sm border border-slate-300 shadow-sm">
+                    <div key={user.id} className={`group bg-white rounded-2xl p-5 border shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col relative overflow-hidden ${user.role === 'supporter' ? 'border-amber-200 hover:border-amber-300' : 'border-slate-200 hover:border-blue-100'
+                        }`}>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-50 transition-colors duration-500" />
+
+                        {/* Identity Signature */}
+                        <div className="flex items-start justify-between relative z-10 mb-4 pb-4 border-b border-slate-100">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-black text-base border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-500">
                                     {getInitials(user.ownerName || user.username)}
                                 </div>
                                 <div>
-                                    <p className="text-slate-800 font-black tracking-tight">{user.ownerName}</p>
-                                    <p className="text-slate-500 font-medium text-xs">@{user.username}</p>
+                                    <p className="text-slate-900 font-black text-sm uppercase tracking-tight truncate max-w-[150px]">{user.ownerName}</p>
+                                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">@{user.username}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => deleteUser(user.id)}
-                                className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 flex items-center justify-center text-red-500 hover:text-red-700 transition-all flex-shrink-0 shadow-sm"
-                                id={`delete-user-${user.id}`}
+                                className="w-10 h-10 rounded-xl bg-white border border-slate-100 text-slate-300 hover:text-red-500 hover:border-red-100 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm active:scale-90"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
 
-                        {/* User details */}
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Building className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                                <span className="text-slate-700 font-bold">{user.companyName}</span>
+                        {/* Attribute Ledger */}
+                        <div className="space-y-3 flex-1 relative z-10">
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Company Name</label>
+                                <div className="flex items-center gap-3">
+                                    <Building className="w-4 h-4 text-blue-600" />
+                                    <span className="text-slate-800 font-black text-sm uppercase tracking-tight">{user.companyName}</span>
+                                </div>
                             </div>
-                            {user.villageName && (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                                    <span className="text-slate-700 font-medium">{user.villageName}</span>
-                                </div>
-                            )}
-                            {user.mobileNumber && (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Phone className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                                    <span className="text-slate-700 font-medium">{user.mobileNumber}</span>
-                                </div>
-                            )}
 
-                            {/* Password row */}
-                            <div className="flex items-center gap-2 text-sm mt-4 pt-4 border-t border-slate-100 bg-slate-50 -mx-5 px-5 -mb-5 pb-5 rounded-b-2xl">
-                                <User className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                                <span className="text-slate-600 font-mono font-bold">
+                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Village</label>
+                                    <div className="flex items-center gap-2">
+                                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                                        <span className="text-slate-600 font-bold text-xs uppercase">{user.villageName || 'N/A'}</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Contact</label>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="w-3.5 h-3.5 text-slate-400" />
+                                        <span className="text-slate-600 font-bold text-xs">{user.mobileNumber || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Security Protocol Footer */}
+                        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between relative z-10">
+                            <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+                                <Shield className="w-3.5 h-3.5 text-slate-400" />
+                                <span className="text-slate-800 font-mono font-black text-xs tracking-wider">
                                     {showPasswords[user.id] ? user.password : '••••••••'}
                                 </span>
-                                <button
-                                    onClick={() => togglePassword(user.id)}
-                                    className="ml-auto text-slate-400 hover:text-slate-600 transition-colors bg-white p-1.5 rounded-md border border-slate-200 shadow-sm"
-                                    title={showPasswords[user.id] ? "Hide Password" : "Show Password"}
-                                >
-                                    {showPasswords[user.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
                             </div>
+                            <button
+                                onClick={() => togglePassword(user.id)}
+                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-900 transition-all shadow-sm active:scale-90 flex items-center justify-center"
+                            >
+                                {showPasswords[user.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
                         </div>
                     </div>
                 ))}
             </div>
 
             {regularUsers.length === 0 && (
-                <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-10 text-center">
-                    <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 font-bold text-lg">No users created yet</p>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Create users to allow bidding</p>
+                <div className="bg-white/50 border-2 border-dashed border-slate-200 rounded-[2rem] p-16 text-center">
+                    <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-8 text-slate-300">
+                        <Users className="w-10 h-10" />
+                    </div>
+                    <p className="text-slate-900 font-black uppercase tracking-[0.3em] text-lg">Empty Directory</p>
+                    <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em] mt-3">No participants registered in current node</p>
                 </div>
             )}
         </div>
     );
 }
+

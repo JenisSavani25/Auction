@@ -19,18 +19,22 @@ export default function AdminPage() {
         switch (activeTab) {
             case 'dashboard':
                 return (
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 animate-in fade-in duration-700">
                         {/* Left: Sponsorship Overview */}
-                        <div className="xl:col-span-2 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="section-title text-xl">Auction Overview</h2>
+                        <div className="lg:col-span-8 space-y-5">
+                            <div className="flex items-end justify-between">
+                                <div className="space-y-1">
+                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Control Center</h2>
+                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Global Overview & Quick Actions</p>
+                                </div>
                                 <button
                                     onClick={() => setActiveTab('sponsorships')}
-                                    className="text-blue-600 hover:text-blue-500 text-sm font-bold flex items-center gap-1 transition-colors"
+                                    className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md active:scale-95"
                                 >
-                                    Manage →
+                                    Manage Matrix
                                 </button>
                             </div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {sponsorships
                                     .filter((s) => s.status !== 'REJECTED')
@@ -38,64 +42,76 @@ export default function AdminPage() {
                                     .map((sp) => (
                                         <SponsorshipCard key={sp.id} sponsorship={sp} />
                                     ))}
+                                {sponsorships.filter(s => s.status !== 'REJECTED').length === 0 && (
+                                    <div className="sm:col-span-2 bg-white/50 p-16 rounded-[2.5rem] text-center border-2 border-dashed border-slate-200 shadow-inner">
+                                        <div className="bg-slate-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-100 shadow-sm">
+                                            <LayoutGrid className="w-10 h-10 text-slate-200" />
+                                        </div>
+                                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">No Active Protocols</h3>
+                                        <p className="text-slate-400 font-medium text-sm mt-2 max-w-xs mx-auto">Initialize new sponsorship lots to begin the auction matrix.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Right sidebar */}
-                        <div className="space-y-4">
-                            <RevenueSummary />
-                            <RecentBidsPanel />
-                            <Leaderboard />
+                        <div className="lg:col-span-4 space-y-5">
+                            <div className="lg:sticky lg:top-24 space-y-4">
+                                <RevenueSummary />
+                                <RecentBidsPanel />
+                                <Leaderboard />
+                            </div>
                         </div>
                     </div>
                 );
             case 'sponsorships':
-                return <AdminSponsorshipManager />;
+                return <div className="animate-in fade-in slide-in-from-bottom-6 duration-700"><AdminSponsorshipManager /></div>;
             case 'users':
-                return <UserManager />;
+                return <div className="animate-in fade-in slide-in-from-bottom-6 duration-700"><UserManager /></div>;
             case 'teams':
-                return <AdminTeamAuction />;
+                return <div className="animate-in fade-in slide-in-from-bottom-6 duration-700"><AdminTeamAuction /></div>;
             case 'analytics':
-                return <AdminAnalytics />;
+                return <div className="animate-in fade-in slide-in-from-bottom-6 duration-700"><AdminAnalytics /></div>;
             default:
                 return null;
         }
     };
 
     const tabs = [
-        { id: 'dashboard', label: 'Dashboard', Icon: LayoutGrid },
-        { id: 'sponsorships', label: 'Sponsorships', Icon: Gavel },
-        { id: 'teams', label: 'Teams Bidding', Icon: ShieldCheck },
-        { id: 'users', label: 'Users', Icon: Users },
-        { id: 'analytics', label: 'Analytics', Icon: BarChart3 },
+        { id: 'dashboard', label: 'Monitor', Icon: LayoutGrid },
+        { id: 'sponsorships', label: 'Auctions', Icon: Gavel },
+        { id: 'teams', label: 'Teams', Icon: ShieldCheck },
+        { id: 'users', label: 'Participants', Icon: Users },
+        { id: 'analytics', label: 'Matrix', Icon: BarChart3 },
     ];
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-slate-50/50">
             <Navbar onTabChange={setActiveTab} activeTab={activeTab} />
 
-            {/* Mobile tabs */}
-            <div className="md:hidden sticky top-16 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
-                <div className="flex overflow-x-auto">
+            {/* Premium Mobile Tab Bar */}
+            <div className="md:hidden sticky top-16 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4">
+                <div className="flex gap-2 py-3 overflow-x-auto no-scrollbar">
                     {tabs.map(({ id, label, Icon }) => (
                         <button
                             key={id}
                             onClick={() => setActiveTab(id)}
-                            className={`flex items-center gap-1.5 px-4 py-3 text-xs font-bold whitespace-nowrap flex-shrink-0 border-b-2 transition-all ${activeTab === id
-                                ? 'border-blue-600 text-blue-700 bg-blue-50/50'
-                                : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                            className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex-1 whitespace-nowrap ${activeTab === id
+                                ? 'bg-slate-900 text-white shadow-lg scale-[1.02]'
+                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800'
                                 }`}
                         >
-                            <Icon className="w-3.5 h-3.5" />
+                            <Icon className="w-4 h-4" />
                             {label}
                         </button>
                     ))}
                 </div>
             </div>
 
-            <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
+            <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
                 {renderContent()}
             </main>
         </div>
     );
 }
+
