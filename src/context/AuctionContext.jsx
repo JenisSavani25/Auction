@@ -72,6 +72,7 @@ export function AuctionProvider({ children }) {
 
     const createUser = useCallback((user) => dispatchAction({ type: 'CREATE_USER', user }), [dispatchAction]);
     const deleteUser = useCallback((userId) => dispatchAction({ type: 'DELETE_USER', userId }), [dispatchAction]);
+    const updateUserRole = useCallback((userId, role) => dispatchAction({ type: 'UPDATE_USER_ROLE', userId, role }), [dispatchAction]);
     const createSponsorship = useCallback((sponsorship) => dispatchAction({ type: 'CREATE_SPONSORSHIP', sponsorship }), [dispatchAction]);
     const startAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'START_AUCTION', sponsorshipId }), [dispatchAction]);
     const allotAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'ALLOT_AUCTION', sponsorshipId }), [dispatchAction]);
@@ -82,6 +83,7 @@ export function AuctionProvider({ children }) {
     const placeBidAs = useCallback((sponsorshipId, bidAmount, actingAs) =>
         dispatchAction({ type: 'PLACE_BID', sponsorshipId, bidAmount, bidder: null, bidderCompany: null, actingAs }), [dispatchAction]);
     const closeWinnerModal = useCallback(() => dispatchAction({ type: 'CLOSE_WINNER_MODAL' }), [dispatchAction]);
+    const reopenAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'REOPEN_AUCTION', sponsorshipId }), [dispatchAction]);
     const extendTimer = useCallback((sponsorshipId, minutes) => dispatchAction({ type: 'EXTEND_TIMER', sponsorshipId, minutes }), [dispatchAction]);
     const updateDuration = useCallback((sponsorshipId, minutes) => dispatchAction({ type: 'UPDATE_DURATION', sponsorshipId, minutes }), [dispatchAction]);
 
@@ -140,6 +142,7 @@ export function AuctionProvider({ children }) {
         clearLoginError,
         createUser,
         deleteUser,
+        updateUserRole,
         createSponsorship,
         startAuction,
         allotAuction,
@@ -147,6 +150,7 @@ export function AuctionProvider({ children }) {
         placeBid,
         placeBidAs,
         closeWinnerModal,
+        reopenAuction,
         extendTimer,
         updateDuration,
         setTeamPrice,

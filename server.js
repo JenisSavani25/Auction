@@ -85,6 +85,11 @@ io.on('connection', (socket) => {
             case 'DELETE_USER':
                 state.users = state.users.filter(u => u.id !== action.userId);
                 break;
+            case 'UPDATE_USER_ROLE':
+                state.users = state.users.map(u =>
+                    u.id === action.userId ? { ...u, role: action.role } : u
+                );
+                break;
             case 'CREATE_SPONSORSHIP':
                 state.sponsorships.push({
                     ...action.sponsorship,
@@ -110,6 +115,18 @@ io.on('connection', (socket) => {
                 state.sponsorships = state.sponsorships.map(sp =>
                     sp.id === action.sponsorshipId ? { ...sp, status: 'REJECTED' } : sp
                 );
+                break;
+            case 'REOPEN_AUCTION':
+                state.sponsorships = state.sponsorships.map(sp => {
+                    if (sp.id !== action.sponsorshipId) return sp;
+                    return {
+                        ...sp,
+                        status: 'UPCOMING',  // reset status only
+                        startTime: null,
+                        endTime: null,
+                        // bids, currentHighestBid, currentHighestBidder preserved
+                    };
+                });
                 break;
             case 'PLACE_BID': {
                 // actingAs is set when a supporter places bid on behalf of a sponsor

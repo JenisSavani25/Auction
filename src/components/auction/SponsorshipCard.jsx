@@ -12,13 +12,14 @@ const STATUS_CONFIG = {
 };
 
 export default function SponsorshipCard({ sponsorship }) {
-    const { currentUser, placeBid } = useAuction();
+    const { currentUser, placeBid, placeBidAs, users } = useAuction();
     const { timeLeft, isUrgent, isWarning, isExpired } = useCountdown(sponsorship.endTime);
 
     const [bidInput, setBidInput] = useState('');
     const [bidError, setBidError] = useState('');
     const [bidSuccess, setBidSuccess] = useState(false);
     const [isFlashing, setIsFlashing] = useState(false);
+    const [selectedUser, setSelectedUser] = useState('');
     const prevHighestBid = useRef(sponsorship.currentHighestBid);
 
     const minBid = getMinimumBid(sponsorship);
@@ -26,6 +27,11 @@ export default function SponsorshipCard({ sponsorship }) {
     const canBid = isOpen && !isExpired;
     const isWinner = sponsorship.currentHighestBidder === currentUser?.ownerName;
     const isAdmin = currentUser?.role === 'admin';
+    const isSupporter = currentUser?.role === 'supporter';
+
+    const sponsors = (users || []).filter(u =>
+        u.role === 'user' || (!u.role && u.id !== 'admin' && u.id !== 'dashboard')
+    );
 
     const statusCfg = STATUS_CONFIG[sponsorship.status] || STATUS_CONFIG.UPCOMING;
     const StatusIcon = statusCfg.Icon;
@@ -58,12 +64,25 @@ export default function SponsorshipCard({ sponsorship }) {
             return;
         }
 
-        placeBid(
-            sponsorship.id,
-            amount,
-            currentUser.ownerName,
-            currentUser.companyName
-        );
+        if (isSupporter) {
+            if (!selectedUser) {
+                setBidError('Please select a sponsor to bid on behalf of');
+                return;
+            }
+            const sponsor = sponsors.find(u => u.id === selectedUser);
+            placeBidAs(
+                sponsorship.id,
+                amount,
+                { ownerName: sponsor.ownerName || sponsor.username, companyName: sponsor.companyName || sponsor.username }
+            );
+        } else {
+            placeBid(
+                sponsorship.id,
+                amount,
+                currentUser.ownerName,
+                currentUser.companyName
+            );
+        }
 
         setBidSuccess(true);
         setBidInput('');
@@ -179,6 +198,26 @@ export default function SponsorshipCard({ sponsorship }) {
                             canBid ? (
                                 <form onSubmit={handleBid} className="space-y-4 pt-2">
                                     <div className="space-y-3">
+
+                                        {/* Supporter Selected Sponsor Dropdown */}
+                                        {isSupporter && (
+                                            <div className="space-y-1 mb-3">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Bidding On Behalf Of</label>
+                                                <select
+                                                    value={selectedUser}
+                                                    onChange={e => { setSelectedUser(e.target.value); setBidError(''); }}
+                                                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-bold focus:outline-none focus:border-blue-500 transition-all text-sm mb-2"
+                                                >
+                                                    <option value="">— Select Sponsor —</option>
+                                                    {sponsors.map(u => (
+                                                        <option key={u.id} value={u.id}>
+                                                            {u.companyName || u.username} {u.ownerName ? `· ${u.ownerName}` : ''}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
                                         <div className="flex items-center justify-between">
                                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Custom Propel</label>
                                             <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Min: {formatCurrency(minBid)}</span>

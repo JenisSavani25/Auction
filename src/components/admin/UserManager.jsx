@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function UserManager() {
-    const { users, createUser, deleteUser, currentUser } = useAuction();
+    const { users, createUser, deleteUser, updateUserRole, currentUser } = useAuction();
     const [showCreate, setShowCreate] = useState(false);
     const [showPasswords, setShowPasswords] = useState({});
     const [form, setForm] = useState({
@@ -69,8 +69,8 @@ export default function UserManager() {
                                     type="button"
                                     onClick={() => setForm(f => ({ ...f, role: r }))}
                                     className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${form.role === r
-                                            ? r === 'supporter' ? 'bg-amber-500 border-amber-500 text-white' : 'bg-blue-700 border-blue-700 text-white'
-                                            : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
+                                        ? r === 'supporter' ? 'bg-amber-500 border-amber-500 text-white' : 'bg-blue-700 border-blue-700 text-white'
+                                        : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
                                         }`}
                                 >
                                     {r === 'supporter' ? '⚡ Supporter' : '🏢 Sponsor'}
@@ -217,8 +217,27 @@ export default function UserManager() {
                             </div>
                         </div>
 
-                        {/* Security Protocol Footer */}
+                        {/* Role badge + toggle */}
                         <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between relative z-10">
+                            <div className="flex items-center gap-2">
+                                <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${user.role === 'supporter'
+                                        ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                        : 'bg-blue-50 border-blue-200 text-blue-700'
+                                    }`}>
+                                    {user.role === 'supporter' ? '⚡ Supporter' : '🏢 Sponsor'}
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => updateUserRole(user.id, user.role === 'supporter' ? 'user' : 'supporter')}
+                                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-widest hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-95"
+                                title="Toggle role between Sponsor and Supporter"
+                            >
+                                Switch Role
+                            </button>
+                        </div>
+
+                        {/* Security Protocol Footer */}
+                        <div className="mt-3 flex items-center justify-between relative z-10">
                             <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
                                 <Shield className="w-3.5 h-3.5 text-slate-400" />
                                 <span className="text-slate-800 font-mono font-black text-xs tracking-wider">

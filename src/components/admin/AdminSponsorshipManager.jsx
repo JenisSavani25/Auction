@@ -6,12 +6,11 @@ import {
     Clock, Plus, Filter, CheckCircle, Ban,
     MoreVertical, ChevronDown, ChevronUp, Activity,
     TrendingUp, Shield, BarChart2, AlertCircle, PlusCircle,
-    User, ArrowRight, Award, Flame
+    User, ArrowRight, Award, Flame, RotateCcw
 } from 'lucide-react';
 
-function AdminSponsorshipRow({ sponsorship }) {
-    const { startAuction, allotAuction, rejectAuction, extendTimer, updateDuration } = useAuction();
-    const [expanded, setExpanded] = useState(false);
+function AdminSponsorshipRow({ sponsorship, expanded, setExpanded, confirmReopen, setConfirmReopen }) {
+    const { startAuction, allotAuction, rejectAuction, reopenAuction, extendTimer, updateDuration } = useAuction();
     const [duration, setDuration] = useState(sponsorship.durationMinutes);
     const { timeLeft, isUrgent } = useCountdown(sponsorship.endTime);
 
@@ -110,9 +109,44 @@ function AdminSponsorshipRow({ sponsorship }) {
                                 )}
 
                                 {sponsorship.status === 'REJECTED' && (
-                                    <button onClick={() => startAuction(sponsorship.id)} className="px-8 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all flex items-center gap-3">
-                                        <RotateCcw className="w-4 h-4" /> Resume Auction
-                                    </button>
+                                    <>
+                                        <button onClick={() => startAuction(sponsorship.id)} className="px-8 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all flex items-center gap-3">
+                                            <RotateCcw className="w-4 h-4" /> Resume Auction
+                                        </button>
+                                        {!confirmReopen ? (
+                                            <button onClick={() => setConfirmReopen(true)} className="px-8 py-4 bg-amber-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20 flex items-center gap-3">
+                                                <RotateCcw className="w-4 h-4" /> Reopen Fresh
+                                            </button>
+                                        ) : (
+                                            <div className="flex items-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-2xl">
+                                                <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest px-2">Confirm Reopen?</span>
+                                                <button onClick={() => { reopenAuction(sponsorship.id); setConfirmReopen(false); }} className="px-4 py-2 bg-amber-500 text-white text-[10px] font-black uppercase rounded-xl hover:bg-amber-600 transition-all">
+                                                    Yes, Reopen
+                                                </button>
+                                                <button onClick={() => setConfirmReopen(false)} className="px-4 py-2 bg-white text-slate-600 text-[10px] font-black uppercase rounded-xl border border-slate-200 hover:bg-slate-50 transition-all">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {sponsorship.status === 'ALLOTED' && (
+                                    !confirmReopen ? (
+                                        <button onClick={() => setConfirmReopen(true)} className="px-8 py-4 bg-amber-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20 flex items-center gap-3">
+                                            <RotateCcw className="w-4 h-4" /> Reopen Sponsorship
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-2xl">
+                                            <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest px-2">Confirm? Bids kept.</span>
+                                            <button onClick={() => { reopenAuction(sponsorship.id); setConfirmReopen(false); }} className="px-4 py-2 bg-amber-500 text-white text-[10px] font-black uppercase rounded-xl hover:bg-amber-600 transition-all">
+                                                Yes, Reopen
+                                            </button>
+                                            <button onClick={() => setConfirmReopen(false)} className="px-4 py-2 bg-white text-slate-600 text-[10px] font-black uppercase rounded-xl border border-slate-200 hover:bg-slate-50 transition-all">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    )
                                 )}
                             </div>
 
@@ -173,6 +207,14 @@ export default function AdminSponsorshipManager() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [form, setForm] = useState({ name: '', basePrice: '', durationMinutes: 5 });
     const [formError, setFormError] = useState('');
+    // Lift expanded + confirmReopen per sponsorship ID so state survives status changes
+    const [expandedMap, setExpandedMap] = useState({});
+    const [confirmReopenMap, setConfirmReopenMap] = useState({});
+
+    const getExpanded = (id) => expandedMap[id] ?? false;
+    const setExpanded = (id, val) => setExpandedMap(m => ({ ...m, [id]: val }));
+    const getConfirmReopen = (id) => confirmReopenMap[id] ?? false;
+    const setConfirmReopen = (id, val) => setConfirmReopenMap(m => ({ ...m, [id]: val }));
 
     const handleCreate = (e) => {
         e.preventDefault();
@@ -221,7 +263,16 @@ export default function AdminSponsorshipManager() {
                     </h4>
                     <div className="grid grid-cols-1 gap-6">
                         {pendingOrOpen.length > 0 ? (
-                            pendingOrOpen.map(sp => <AdminSponsorshipRow key={sp.id} sponsorship={sp} />)
+                            pendingOrOpen.map(sp => (
+                                <AdminSponsorshipRow
+                                    key={sp.id}
+                                    sponsorship={sp}
+                                    expanded={getExpanded(sp.id)}
+                                    setExpanded={(val) => setExpanded(sp.id, val)}
+                                    confirmReopen={getConfirmReopen(sp.id)}
+                                    setConfirmReopen={(val) => setConfirmReopen(sp.id, val)}
+                                />
+                            ))
                         ) : (
                             <div className="py-20 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
                                 <Award className="w-12 h-12 text-slate-200 mx-auto mb-4" />
@@ -240,7 +291,16 @@ export default function AdminSponsorshipManager() {
                             <span className="h-px flex-1 bg-slate-100" />
                         </h4>
                         <div className="grid grid-cols-1 gap-4 opacity-75">
-                            {pastLots.map(sp => <AdminSponsorshipRow key={sp.id} sponsorship={sp} />)}
+                            {pastLots.map(sp => (
+                                <AdminSponsorshipRow
+                                    key={sp.id}
+                                    sponsorship={sp}
+                                    expanded={getExpanded(sp.id)}
+                                    setExpanded={(val) => setExpanded(sp.id, val)}
+                                    confirmReopen={getConfirmReopen(sp.id)}
+                                    setConfirmReopen={(val) => setConfirmReopen(sp.id, val)}
+                                />
+                            ))}
                         </div>
                     </div>
                 )}
