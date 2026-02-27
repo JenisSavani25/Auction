@@ -25,7 +25,7 @@ export default function Navbar({ onTabChange, activeTab, userRoleProp }) {
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
                 {/* Logo */}
                 <div className="flex items-center gap-3 flex-shrink-0">
-                    <img src="/logo.png" alt="VTPL Logo" className="h-10 w-auto object-contain" />
+                    <img src="/Shree%20Vallabhipur%20Taluka%20Cricket%20Logo.png" alt="VTPL Logo" className="h-10 w-auto object-contain" />
                     <div className="hidden sm:block">
                         <p className="text-sm font-black font-poppins text-slate-800 tracking-tight leading-none uppercase">VTPL Auction</p>
                         <p className="text-slate-500 font-bold text-[10px] mt-0.5 tracking-widest uppercase">2026 Season</p>

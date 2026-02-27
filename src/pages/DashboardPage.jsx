@@ -31,9 +31,7 @@ const DashboardPage = () => {
             {/* Header Section */}
             <header className="flex justify-between items-center mb-10 border-b border-slate-300 pb-6 relative z-10">
                 <div className="flex items-center gap-4">
-                    <div className="h-14 w-14 bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                        <Trophy className="w-8 h-8 text-yellow-400 fill-yellow-400" />
-                    </div>
+                    <img src="/Shree%20Vallabhipur%20Taluka%20Cricket%20Logo.png" alt="VTPL 2026 Logo" className="h-20 w-auto object-contain drop-shadow-md" />
                     <div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase drop-shadow-sm">
                             VTPL 2026 <span className="text-blue-700">Auction</span>
