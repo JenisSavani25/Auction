@@ -2,6 +2,10 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -9,7 +13,7 @@ app.use(cors());
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
-        origin: "*", // Adjust depending on where your Vite app is hosted (e.g., http://localhost:5173)
+        origin: "*",
         methods: ["GET", "POST"]
     }
 });
@@ -50,9 +54,22 @@ let state = {
     }
 };
 
-// HELPER: Broadcast state to all connected clients
-function broadcastState() {
+let globalStateCollection = null;
+
+// HELPER: Broadcast state to all connected clients and persist to DB
+async function broadcastState() {
     io.emit('stateUpdate', state);
+    if (globalStateCollection) {
+        try {
+            await globalStateCollection.updateOne(
+                { _id: 'global_state' },
+                { $set: { state } },
+                { upsert: true }
+            );
+        } catch (err) {
+            console.error("Error saving to MongoDB:", err);
+        }
+    }
 }
 
 io.on('connection', (socket) => {
@@ -238,6 +255,36 @@ setInterval(() => {
 }, 1000); // Check every second
 
 const PORT = process.env.PORT || 3001;
-httpServer.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-});
+
+async function startServer() {
+    if (process.env.MONGO_URI) {
+        try {
+            const client = new MongoClient(process.env.MONGO_URI);
+            await client.connect();
+            console.log("Connected to MongoDB Atlas!");
+
+            const db = client.db('auction_db');
+            globalStateCollection = db.collection('auction_state');
+
+            const savedDoc = await globalStateCollection.findOne({ _id: 'global_state' });
+            if (savedDoc && savedDoc.state) {
+                // Load the exact state from when the server last shut down/went to sleep
+                state = savedDoc.state;
+                console.log("Successfully loaded live auction state from MongoDB.");
+            } else {
+                console.log("No previous state found. Initializing with default hardcoded values.");
+                await globalStateCollection.insertOne({ _id: 'global_state', state });
+            }
+        } catch (err) {
+            console.error("Failed to connect to MongoDB. Running in memory mode.", err);
+        }
+    } else {
+        console.log("No MONGO_URI found in environment limits. Running with in-memory state only.");
+    }
+
+    httpServer.listen(PORT, () => {
+        console.log(`Server listening on port ${PORT}`);
+    });
+}
+
+startServer();
