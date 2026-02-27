@@ -25,7 +25,7 @@ function SponsorshipBidPanel({ sponsorship, sponsors, now }) {
     const canBid = isOpen && !isExpired;
 
     const minBid = sponsorship.currentHighestBid > 0
-        ? sponsorship.currentHighestBid + 1
+        ? sponsorship.currentHighestBid
         : sponsorship.basePrice;
 
     const handleBid = (e) => {
@@ -35,8 +35,8 @@ function SponsorshipBidPanel({ sponsorship, sponsors, now }) {
         const amount = parseFloat(bidAmount);
         if (isNaN(amount) || amount <= 0) { setBidError('Enter a valid bid amount'); return; }
         if (amount < sponsorship.basePrice) { setBidError(`Min bid is ${formatCurrency(sponsorship.basePrice)}`); return; }
-        if (sponsorship.currentHighestBid > 0 && amount <= sponsorship.currentHighestBid) {
-            setBidError(`Must exceed current highest: ${formatCurrency(sponsorship.currentHighestBid)}`);
+        if (sponsorship.currentHighestBid > 0 && amount < sponsorship.currentHighestBid) {
+            setBidError(`Bid must be at least ${formatCurrency(sponsorship.currentHighestBid)}`);
             return;
         }
         const sponsor = sponsors.find(u => u.id === selectedSponsor);

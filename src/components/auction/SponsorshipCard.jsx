@@ -53,8 +53,8 @@ export default function SponsorshipCard({ sponsorship }) {
             setBidError(`Minimum bid is ${formatCurrency(sponsorship.basePrice)} (base price)`);
             return;
         }
-        if (sponsorship.currentHighestBid > 0 && amount <= sponsorship.currentHighestBid) {
-            setBidError(`Bid must exceed current highest: ${formatCurrency(sponsorship.currentHighestBid)}`);
+        if (sponsorship.currentHighestBid > 0 && amount < sponsorship.currentHighestBid) {
+            setBidError(`Bid must be at least ${formatCurrency(sponsorship.currentHighestBid)}`);
             return;
         }
 

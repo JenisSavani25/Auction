@@ -14,11 +14,26 @@ const DashboardPage = () => {
     const [now, setNow] = useState(Date.now());
     const [viewMode, setViewMode] = useState('sponsorships');
     const [searchTerm, setSearchTerm] = useState('');
+    // Track which sponsorship cards are flashing (received a new bid)
+    const [flashingIds, setFlashingIds] = useState({});
+    const prevBidCounts = React.useRef({});
 
     useEffect(() => {
         const timer = setInterval(() => setNow(Date.now()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    // Detect new bids → trigger 2s flash on that card
+    useEffect(() => {
+        sponsorships.forEach(sp => {
+            const prev = prevBidCounts.current[sp.id] ?? sp.bids.length;
+            if (sp.bids.length > prev) {
+                setFlashingIds(f => ({ ...f, [sp.id]: true }));
+                setTimeout(() => setFlashingIds(f => { const n = { ...f }; delete n[sp.id]; return n; }), 2000);
+            }
+            prevBidCounts.current[sp.id] = sp.bids.length;
+        });
+    }, [sponsorships]);
 
     // Filter participants based on search
     const filteredParticipants = users.filter(u =>
@@ -29,7 +44,14 @@ const DashboardPage = () => {
         )
     );
 
-    const liveSponsorships = sponsorships.filter(s => s.status === 'OPEN');
+    // Sort live sponsorships: most recently bid first (by latest bid timestamp)
+    const liveSponsorships = sponsorships
+        .filter(s => s.status === 'OPEN')
+        .sort((a, b) => {
+            const aTime = a.bids[0]?.timestamp ?? 0;
+            const bTime = b.bids[0]?.timestamp ?? 0;
+            return bTime - aTime; // most recent bid at top
+        });
     const finalizedSponsorships = sponsorships.filter(s => s.status === 'ALLOTED');
     const totalBids = sponsorships.reduce((sum, s) => sum + s.bids.length, 0);
     const totalRevenue = finalizedSponsorships.reduce((sum, s) => sum + (s.currentHighestBid || 0), 0);
@@ -126,7 +148,10 @@ const DashboardPage = () => {
                                         const s = Math.floor((diff % 60000) / 1000);
                                         const isUrgent = diff > 0 && diff < 60000;
                                         return (
-                                            <div key={sp.id} className="glass-card bg-white border border-slate-200 p-6 hover:border-blue-300 hover:shadow-md transition-all duration-300 relative overflow-hidden">
+                                            <div key={sp.id} className={`glass-card p-6 hover:shadow-md transition-all duration-300 relative overflow-hidden border ${flashingIds[sp.id]
+                                                    ? 'border-emerald-400 bg-emerald-50 shadow-emerald-200/60 shadow-lg animate-pulse'
+                                                    : 'bg-white border-slate-200 hover:border-blue-300'
+                                                }`}>
                                                 {/* Live dot */}
                                                 <div className="absolute top-5 right-5 flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-100 rounded-full">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />

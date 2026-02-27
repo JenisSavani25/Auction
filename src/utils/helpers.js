@@ -50,7 +50,7 @@ export function getMinimumBid(sponsorship) {
     if (!sponsorship.currentHighestBid || sponsorship.currentHighestBid === 0) {
         return sponsorship.basePrice;
     }
-    return sponsorship.currentHighestBid + 1;
+    return sponsorship.currentHighestBid; // equal or higher allowed
 }
 
 /**
