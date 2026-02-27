@@ -35,9 +35,7 @@ export default function LoginPage() {
             <div className="w-full max-w-md animate-fade-in relative z-10">
                 {/* Logo / Header */}
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-700 to-blue-900 shadow-md shadow-blue-500/20 mb-5 animate-float">
-                        <Gavel className="w-10 h-10 text-yellow-400" strokeWidth={2.5} />
-                    </div>
+                    <img src="/logo.png" alt="VTPL 2026 Logo" className="w-64 h-auto mx-auto mb-6 drop-shadow-md animate-float" />
                     <h1 className="text-3xl font-bold font-poppins text-slate-800 drop-shadow-sm mb-2">
                         Sponsorship Auction
                     </h1>

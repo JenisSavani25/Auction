@@ -14,9 +14,11 @@
   body {
     @apply bg-slate-100 text-slate-900 font-inter antialiased bg-fixed;
     background-image:
-      radial-gradient(ellipse at 20% 20%, rgba(29, 78, 216, 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(250, 204, 21, 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(14, 165, 233, 0.03) 0%, transparent 50%);
+      linear-gradient(rgba(255, 255, 255, 0.85), rgba(241, 245, 249, 0.95)),
+      url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2600&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     min-height: 100vh;
   }
 

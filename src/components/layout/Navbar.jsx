@@ -25,9 +25,7 @@ export default function Navbar({ onTabChange, activeTab, userRoleProp }) {
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
                 {/* Logo */}
                 <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-blue-700 to-blue-900 shadow-sm border border-blue-600">
-                        <Gavel className="w-5 h-5 text-yellow-400" strokeWidth={2.5} />
-                    </div>
+                    <img src="/logo.png" alt="VTPL Logo" className="h-10 w-auto object-contain" />
                     <div className="hidden sm:block">
                         <p className="text-sm font-black font-poppins text-slate-800 tracking-tight leading-none uppercase">VTPL Auction</p>
                         <p className="text-slate-500 font-bold text-[10px] mt-0.5 tracking-widest uppercase">2026 Season</p>
