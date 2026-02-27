@@ -107,7 +107,7 @@ function SponsorshipBidPanel({ sponsorship, sponsors, now }) {
                                     <option value="">— Select Sponsor —</option>
                                     {sponsors.map(u => (
                                         <option key={u.id} value={u.id}>
-                                            {u.companyName} · {u.ownerName}
+                                            {u.companyName || u.username} {u.ownerName ? `· ${u.ownerName}` : ''}{u.villageName ? ` (${u.villageName})` : ''}
                                         </option>
                                     ))}
                                 </select>
@@ -315,11 +315,11 @@ export default function SupporterPage() {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`font-black text-sm uppercase tracking-tight truncate ${isInterested ? 'text-white' : 'text-slate-900'}`}>
-                                                        {sponsor.companyName}
+                                                        {sponsor.companyName || sponsor.username}
                                                     </p>
                                                     <p className={`text-[10px] font-black uppercase tracking-widest truncate mt-0.5 ${isInterested ? 'text-blue-100' : 'text-slate-400'}`}>
-                                                        {sponsor.ownerName}
-                                                        {sponsor.villageName && ` · ${sponsor.villageName}`}
+                                                        {sponsor.ownerName || '—'}
+                                                        {sponsor.villageName ? ` · ${sponsor.villageName}` : ''}
                                                     </p>
                                                 </div>
                                                 {/* Toggle button */}

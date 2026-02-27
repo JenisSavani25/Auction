@@ -12,13 +12,7 @@
   }
 
   body {
-    @apply bg-slate-100 text-slate-900 font-inter antialiased bg-fixed;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.85), rgba(241, 245, 249, 0.95)),
-      url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2600&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    @apply bg-white text-slate-900 font-inter antialiased;
     min-height: 100vh;
   }
 

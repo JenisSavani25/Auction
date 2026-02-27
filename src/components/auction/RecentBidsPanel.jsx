@@ -37,19 +37,28 @@ export default function RecentBidsPanel() {
                     recentBids.map((bid, i) => (
                         <div
                             key={bid.id}
-                            className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 shadow-sm border ${i === 0 ? 'animate-slide-in border-green-200 bg-green-50 shadow-green-100/50' : 'bg-slate-50 border-slate-100 hover:border-slate-200 hover:bg-white'
-                                }`}
+                            className={`p-3 rounded-xl transition-all duration-200 shadow-sm border ${i === 0 ? 'animate-slide-in border-green-200 bg-green-50 shadow-green-100/50' : 'bg-slate-50 border-slate-100 hover:border-slate-200 hover:bg-white'}`}
                         >
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm border border-blue-600">
-                                {getInitials(bid.bidder)}
+                            {/* Top row: avatar + company + amount */}
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm border border-blue-600">
+                                    {getInitials(bid.bidder)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-slate-800 text-xs font-black truncate tracking-tight">{bid.bidderCompany}</p>
+                                    <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest truncate">{bid.bidder}</p>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <p className="text-blue-700 text-xs font-black font-mono">{formatCurrency(bid.amount)}</p>
+                                    <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">{timeAgo(bid.timestamp)}</p>
+                                </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-slate-800 text-xs font-black truncate tracking-tight">{bid.bidderCompany}</p>
-                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest truncate mt-0.5">{getSpName(bid.sponsorshipId)}</p>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                                <p className="text-blue-700 text-xs font-black font-mono">{formatCurrency(bid.amount)}</p>
-                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{timeAgo(bid.timestamp)}</p>
+                            {/* Bottom row: lot name badge */}
+                            <div className="mt-2 flex items-center gap-1.5">
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-shrink-0">Bidding on:</span>
+                                <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-full text-blue-700 text-[9px] font-black uppercase tracking-widest truncate">
+                                    {bid.sponsorshipName || getSpName(bid.sponsorshipId)}
+                                </span>
                             </div>
                         </div>
                     ))

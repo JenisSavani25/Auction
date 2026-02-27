@@ -53,7 +53,7 @@ export default function Leaderboard() {
                                 {/* Company info */}
                                 <div className="flex-1 min-w-0">
                                     <p className="text-slate-800 text-xs font-black truncate tracking-tight">{entry.company}</p>
-                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{entry.bidCount} BIDS</p>
+                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{entry.lotsCount} LOT{entry.lotsCount !== 1 ? 'S' : ''}</p>
                                 </div>
 
                                 {/* Total */}

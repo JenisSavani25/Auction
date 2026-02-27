@@ -5,18 +5,17 @@ import { Hand, Users, Sparkles, CheckCircle, Shield, Gavel, Award, MapPin } from
 
 export default function UserTeamAuction() {
     const { teamAuction, toggleTeamInterest, currentUser } = useAuction();
-
     const isInterested = (teamAuction.interestedBidders || []).some((b) => b.id === currentUser.id);
 
     if (teamAuction.status === 'NOT_STARTED') {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8">
-                <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/10 animate-pulse">
-                    <Shield className="w-10 h-10 text-slate-500" />
+                <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 border border-slate-200">
+                    <Shield className="w-10 h-10 text-slate-300" />
                 </div>
-                <h2 className="text-3xl font-black text-white mb-4 tracking-tight uppercase italic">Auction Gate Closed</h2>
-                <p className="text-slate-500 font-bold max-w-sm uppercase text-xs tracking-widest leading-relaxed">
-                    The Uniform Price Team Discovery has not been initiated by the ground officials. Please await further instructions.
+                <h2 className="text-2xl font-black text-slate-800 mb-3 tracking-tight uppercase">Auction Gate Closed</h2>
+                <p className="text-slate-500 font-bold max-w-sm text-xs tracking-widest uppercase leading-relaxed">
+                    The Team Auction has not been started yet. Please wait for the admin to begin.
                 </p>
             </div>
         );
@@ -24,30 +23,29 @@ export default function UserTeamAuction() {
 
     if (teamAuction.status === 'INAUGURATION') {
         return (
-            <div className="animate-in zoom-in-95 duration-700 py-12 px-4">
-                <div className="text-center mb-16">
-                    <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-yellow-400/20">
-                        <Sparkles className="w-10 h-10 text-blue-900" />
+            <div className="animate-in zoom-in-95 duration-700 py-8 px-4">
+                <div className="text-center mb-10">
+                    <div className="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-yellow-400/20">
+                        <Sparkles className="w-8 h-8 text-white" />
                     </div>
-                    <h2 className="text-5xl font-black text-white tracking-tighter uppercase italic mb-4">The Teams are Official!</h2>
-                    <p className="text-blue-400 font-black text-sm uppercase tracking-[0.3em]">Authorized Assignments for 2026 Season</p>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase mb-2">Teams Announced!</h2>
+                    <p className="text-blue-600 font-black text-xs uppercase tracking-widest">Authorised assignments for 2026 season</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     {(teamAuction.assignments || []).map((assignment, idx) => (
-                        <div key={idx} className="bg-[#111622] overflow-hidden hover:scale-105 transition-all duration-500 border border-white/5 rounded-[2.5rem] shadow-2xl group">
-                            <div className="h-32 bg-gradient-to-br from-blue-600 to-indigo-700 border-b border-white/10 relative flex items-center justify-center p-6">
-                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-                                <h3 className="text-2xl font-black text-white relative z-10 tracking-tight uppercase italic text-center leading-none">
+                        <div key={idx} className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300 group">
+                            <div className="h-24 bg-gradient-to-br from-blue-600 to-blue-800 relative flex items-center justify-center p-4">
+                                <h3 className="text-xl font-black text-white tracking-tight uppercase text-center leading-none relative z-10">
                                     {assignment.teamName}
                                 </h3>
                             </div>
-                            <div className="p-8 text-center relative">
-                                <div className="w-16 h-16 mx-auto -mt-16 mb-4 rounded-2xl bg-white flex items-center justify-center shadow-2xl relative z-10 text-blue-900 font-black text-xl border-4 border-[#111622]">
+                            <div className="p-5 text-center">
+                                <div className="w-12 h-12 mx-auto -mt-11 mb-3 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center shadow-md text-blue-700 font-black text-base relative z-10">
                                     {getInitials(assignment.companyName)}
                                 </div>
-                                <p className="text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] mb-2">{assignment.ownerName}</p>
-                                <p className="text-white font-black text-xl leading-tight uppercase tracking-tight">{assignment.companyName}</p>
+                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">{assignment.ownerName}</p>
+                                <p className="text-slate-900 font-black text-sm uppercase tracking-tight">{assignment.companyName}</p>
                             </div>
                         </div>
                     ))}
@@ -57,97 +55,91 @@ export default function UserTeamAuction() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+        <div className="max-w-3xl mx-auto py-8 px-4 space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
+
+            {/* Header */}
             <div className="text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 rounded-full border border-blue-500/20 mb-6 font-black text-[10px] text-blue-400 uppercase tracking-widest">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 rounded-full border border-blue-100 mb-4 font-black text-[10px] text-blue-600 uppercase tracking-widest">
                     <Gavel className="w-3 h-3" /> Team Discovery Portal
                 </div>
-                <h2 className="text-5xl font-black text-white uppercase tracking-tighter italic mb-3">Round {teamAuction.roundNumber}</h2>
-                <p className="text-slate-500 font-black text-xs uppercase tracking-[0.3em]">Live Price Discovery in Progress</p>
+                <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-1">Round {teamAuction.roundNumber}</h2>
+                <p className="text-slate-400 font-black text-xs uppercase tracking-widest">Live Price Discovery in Progress</p>
             </div>
 
-            <div className="bg-[#111622] rounded-[3.5rem] overflow-hidden border border-white/5 shadow-2xl relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full -mr-32 -mt-32 blur-3xl" />
-
-                <div className="bg-white/[0.02] p-12 lg:p-16 text-center border-b border-white/5 relative z-10">
-                    <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em] mb-6">Current Reservation Price</p>
-                    <div className="relative inline-block">
-                        <div className="absolute inset-x-0 bottom-0 h-12 bg-blue-500/20 blur-[60px] rounded-full" />
-                        <p className="text-7xl lg:text-8xl font-black font-mono text-white tracking-tighter leading-none relative z-10">
-                            ₹{formatCurrency(teamAuction.currentPrice)}
-                        </p>
-                    </div>
+            {/* Price Card */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-8 text-center border-b border-slate-100 bg-gradient-to-br from-blue-50 to-slate-50">
+                    <p className="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-3">Current Reservation Price</p>
+                    <p className="text-5xl font-black font-mono text-slate-900 tracking-tighter">
+                        {formatCurrency(teamAuction.currentPrice)}
+                    </p>
                 </div>
 
-                <div className="p-12 lg:p-16 relative z-10">
+                <div className="p-6">
                     {teamAuction.status === 'ROUND_ACTIVE' && (
-                        <div className="space-y-10">
-                            <div className="text-center space-y-2">
-                                <p className="text-slate-300 font-bold text-lg mb-2">Confirm your interest for this price point</p>
-                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">A total of 12 slots are available</p>
+                        <div className="space-y-5">
+                            <div className="text-center">
+                                <p className="text-slate-600 font-bold text-sm">Confirm your interest at this price point</p>
+                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">12 slots available in total</p>
                             </div>
 
                             <button
                                 onClick={() => toggleTeamInterest(currentUser)}
-                                className={`w-full py-8 rounded-[2.5rem] font-black text-2xl transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 group active:scale-[0.98] ${isInterested
-                                    ? 'bg-emerald-600 text-white shadow-emerald-600/20'
-                                    : 'bg-white text-slate-900 hover:bg-blue-600 hover:text-white hover:shadow-blue-600/20'
+                                className={`w-full py-5 rounded-2xl font-black text-lg transition-all duration-300 shadow-md flex items-center justify-center gap-3 active:scale-[0.98] border ${isInterested
+                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-emerald-600/20'
+                                    : 'bg-blue-700 text-white border-blue-700 hover:bg-blue-800 shadow-blue-700/20'
                                     }`}
                             >
                                 {isInterested ? (
                                     <>
-                                        <CheckCircle className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                                        <CheckCircle className="w-6 h-6" />
                                         <span>I AM INTERESTED</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Hand className="w-8 h-8 group-hover:-rotate-12 transition-transform" />
-                                        <span>BID INTEREST</span>
+                                        <Hand className="w-6 h-6" />
+                                        <span>BID MY INTEREST</span>
                                     </>
                                 )}
                             </button>
 
                             {isInterested && (
-                                <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] flex items-center justify-center gap-4 animate-in slide-in-from-top-4">
-                                    <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                                        <CheckCircle className="w-5 h-5 text-white" />
-                                    </div>
-                                    <p className="text-emerald-400 font-black text-[11px] uppercase tracking-widest">Interest Recorded. Awaiting Next Round.</p>
+                                <div className="px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-center gap-3 animate-in slide-in-from-top-4">
+                                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                                    <p className="text-emerald-700 font-black text-[11px] uppercase tracking-widest">Interest Recorded — Awaiting Next Round</p>
                                 </div>
                             )}
                         </div>
                     )}
 
                     {teamAuction.status === 'ROUND_STOPPED' && (
-                        <div className="text-center py-12 space-y-8 animate-in fade-in duration-700">
-                            <div className="w-20 h-20 rounded-[2rem] bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto relative">
-                                <div className="absolute inset-0 bg-indigo-500/20 rounded-[2rem] animate-ping" />
-                                <Users className="w-10 h-10 text-indigo-400" />
+                        <div className="text-center py-8 space-y-5 animate-in fade-in duration-700">
+                            <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto">
+                                <Users className="w-8 h-8 text-blue-500" />
                             </div>
-                            <div className="space-y-4">
-                                <h3 className="text-2xl font-black uppercase tracking-tight text-white italic">Evaluating Consensus</h3>
-                                <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.2em] max-w-md mx-auto leading-relaxed">
-                                    The ground officials are currently tallying interest signatures. Next price Discovery round will commence shortly.
+                            <div>
+                                <h3 className="text-xl font-black uppercase tracking-tight text-slate-900">Evaluating Consensus</h3>
+                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2 max-w-md mx-auto leading-relaxed">
+                                    Officials are tallying interest. The next round will begin shortly.
                                 </p>
                             </div>
                             {isInterested && (
-                                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                                    <CheckCircle className="w-4 h-4" /> Participation Signature Active
+                                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-widest">
+                                    <CheckCircle className="w-4 h-4" /> Your interest is recorded
                                 </div>
                             )}
                         </div>
                     )}
 
                     {teamAuction.status === 'ASSIGNING' && (
-                        <div className="text-center py-12 space-y-8 animate-in zoom-in-95 duration-1000">
-                            <div className="w-20 h-20 rounded-[2rem] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto relative shadow-2xl shadow-blue-500/20">
-                                <div className="absolute inset-0 bg-blue-500/20 rounded-[2rem] animate-pulse" />
-                                <Sparkles className="w-10 h-10 text-blue-400" />
+                        <div className="text-center py-8 space-y-5 animate-in zoom-in-95 duration-700">
+                            <div className="w-16 h-16 rounded-2xl bg-yellow-50 border border-yellow-200 flex items-center justify-center mx-auto">
+                                <Sparkles className="w-8 h-8 text-yellow-500" />
                             </div>
-                            <div className="space-y-4">
-                                <h3 className="text-2xl font-black uppercase tracking-tight text-white italic">Finalizing Allocations</h3>
-                                <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.2em] max-w-md mx-auto leading-relaxed">
-                                    Price Discovery Successful. 12 Primary Partners have been selected. Assigning team rosters now...
+                            <div>
+                                <h3 className="text-xl font-black uppercase tracking-tight text-slate-900">Finalizing Allocations</h3>
+                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2 max-w-md mx-auto leading-relaxed">
+                                    12 partners selected. Team rosters being assigned now…
                                 </p>
                             </div>
                         </div>
@@ -155,24 +147,24 @@ export default function UserTeamAuction() {
                 </div>
             </div>
 
-            {/* Price Trend Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-                <div className="p-8 bg-[#111622] rounded-[2.5rem] border border-white/5">
-                    <div className="flex items-center gap-3 mb-6">
-                        <Award className="w-5 h-5 text-yellow-500" />
+            {/* Info Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Award className="w-4 h-4 text-yellow-500" />
                         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Market Status</h4>
                     </div>
-                    <p className="text-slate-500 font-bold text-[11px] uppercase tracking-widest leading-relaxed">
-                        Each round, the price will fluctuate based on the number of interested sponsors. Once we hit exactly 12 sponsors, the auction closes.
+                    <p className="text-slate-600 font-bold text-xs uppercase tracking-widest leading-relaxed">
+                        Price adjusts each round based on interest. Auction closes when exactly 12 sponsors commit.
                     </p>
                 </div>
-                <div className="p-8 bg-[#111622] rounded-[2.5rem] border border-white/5">
-                    <div className="flex items-center gap-3 mb-6">
-                        <MapPin className="w-5 h-5 text-blue-500" />
-                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Authorized Zone</h4>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                        <MapPin className="w-4 h-4 text-blue-500" />
+                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Your Identity</h4>
                     </div>
-                    <p className="text-slate-500 font-bold text-[11px] uppercase tracking-widest leading-relaxed">
-                        Logged in as <span className="text-white">{currentUser.companyName}</span>. Your interest represents your commitment at the displayed round price.
+                    <p className="text-slate-600 font-bold text-xs uppercase tracking-widest leading-relaxed">
+                        Logged in as <span className="text-blue-700">{currentUser.companyName}</span>. Your interest represents your commitment at the displayed price.
                     </p>
                 </div>
             </div>

@@ -99,15 +99,28 @@ export function AuctionProvider({ children }) {
     const leaderboard = React.useMemo(() => {
         if (!globalState) return [];
         const totals = {};
+
         globalState.sponsorships.forEach((sp) => {
+            // For each sponsorship, find the highest bid per company (not sum of all bids)
+            const topBidPerCompany = {};
             sp.bids.forEach((bid) => {
-                if (!totals[bid.bidderCompany]) {
-                    totals[bid.bidderCompany] = { company: bid.bidderCompany, owner: bid.bidder, total: 0, bidCount: 0 };
+                const co = bid.bidderCompany;
+                if (!topBidPerCompany[co] || bid.amount > topBidPerCompany[co].amount) {
+                    topBidPerCompany[co] = bid;
                 }
-                totals[bid.bidderCompany].total += bid.amount;
-                totals[bid.bidderCompany].bidCount += 1;
+            });
+
+            // Now add that single top bid per company into the grand total
+            Object.values(topBidPerCompany).forEach((bid) => {
+                const co = bid.bidderCompany;
+                if (!totals[co]) {
+                    totals[co] = { company: co, owner: bid.bidder, total: 0, lotsCount: 0 };
+                }
+                totals[co].total += bid.amount;
+                totals[co].lotsCount += 1;  // count of distinct sponsorships they leading/bid on
             });
         });
+
         return Object.values(totals)
             .sort((a, b) => b.total - a.total)
             .slice(0, 10);
