@@ -1,29 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAuction } from '../../context/AuctionContext';
 import { formatCurrency } from '../../utils/helpers';
 import { Crown, X, Trophy, Sparkles } from 'lucide-react';
-
-function ConfettiPiece({ style }) {
-    return <div className="absolute w-2 h-2 rounded-sm animate-bounce" style={style} />;
-}
+import confetti from 'canvas-confetti';
 
 export default function WinnerModal() {
     const { winnerModal, closeWinnerModal } = useAuction();
-    const [confetti, setConfetti] = useState([]);
 
     useEffect(() => {
-        if (winnerModal) {
-            const pieces = Array.from({ length: 30 }, (_, i) => ({
-                key: i,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                backgroundColor: ['#facc15', '#22c55e', '#3b82f6', '#a855f7', '#ef4444'][i % 5],
-                animationDelay: `${Math.random() * 1}s`,
-                animationDuration: `${0.8 + Math.random() * 0.8}s`,
-                transform: `rotate(${Math.random() * 360}deg)`,
-            }));
-            setConfetti(pieces);
-        }
+        if (!winnerModal) return;
+
+        const duration = 15 * 1000; // Will run fireworks for up to 15 seconds or until closed
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 }; // Ensure zIndex is high enough
+
+        const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+        const interval = setInterval(() => {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+
+            confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+            });
+            confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+            });
+        }, 250);
+
+        // Cleanup function runs when the modal closes or component unmounts
+        return () => clearInterval(interval);
     }, [winnerModal]);
 
     if (!winnerModal) return null;
@@ -43,22 +58,7 @@ export default function WinnerModal() {
 
             {/* Modal */}
             <div className="relative w-full max-w-md animate-confetti z-10">
-                {/* Confetti */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-                    {confetti.map((c) => (
-                        <ConfettiPiece
-                            key={c.key}
-                            style={{
-                                left: c.left,
-                                top: c.top,
-                                backgroundColor: c.backgroundColor,
-                                animationDelay: c.animationDelay,
-                                animationDuration: c.animationDuration,
-                                transform: c.transform,
-                            }}
-                        />
-                    ))}
-                </div>
+                {/* Confetti (handled by canvas-confetti externally now) */}
 
                 {/* Card */}
                 <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
