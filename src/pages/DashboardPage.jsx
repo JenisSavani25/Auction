@@ -149,8 +149,8 @@ const DashboardPage = () => {
                                         const isUrgent = diff > 0 && diff < 60000;
                                         return (
                                             <div key={sp.id} className={`glass-card p-6 hover:shadow-md transition-all duration-300 relative overflow-hidden border ${flashingIds[sp.id]
-                                                    ? 'border-emerald-400 bg-emerald-50 shadow-emerald-200/60 shadow-lg animate-pulse'
-                                                    : 'bg-white border-slate-200 hover:border-blue-300'
+                                                ? 'border-emerald-400 bg-emerald-50 shadow-emerald-200/60 shadow-lg animate-pulse'
+                                                : 'bg-white border-slate-200 hover:border-blue-300'
                                                 }`}>
                                                 {/* Live dot */}
                                                 <div className="absolute top-5 right-5 flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-100 rounded-full">
@@ -207,32 +207,37 @@ const DashboardPage = () => {
                                     </h2>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         {finalizedSponsorships.map(sp => (
-                                            <div key={sp.id} className="glass-card bg-white border border-emerald-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all duration-300 relative overflow-hidden">
+                                            <div key={sp.id} className="glass-card bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-yellow-500/50 p-6 shadow-xl shadow-yellow-500/10 hover:shadow-yellow-500/20 hover:-translate-y-1 transition-all duration-500 relative overflow-hidden group">
+                                                {/* Shimmer effect */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
+
                                                 {/* Allotted badge */}
-                                                <div className="absolute top-5 right-5 flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                                                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                                    <span className="text-emerald-600 text-[9px] font-black uppercase tracking-widest">Allotted</span>
+                                                <div className="absolute top-5 right-5 flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/20 border border-yellow-500/50 rounded-full backdrop-blur-md">
+                                                    <Trophy className="w-3 h-3 text-yellow-500" />
+                                                    <span className="text-yellow-500 text-[9px] font-black uppercase tracking-widest">Allotted</span>
                                                 </div>
 
-                                                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-4 pr-20 truncate">{sp.name}</h3>
+                                                <h3 className="text-lg font-black text-white uppercase tracking-tight mb-4 pr-24 truncate">{sp.name}</h3>
 
                                                 {/* Final Bid */}
                                                 <div className="mb-5">
-                                                    <p className="label text-slate-400 mb-1">Final Bid</p>
-                                                    <p className="text-3xl font-black font-mono text-blue-700 tracking-tighter">
+                                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Winning Propel</p>
+                                                    <p className="text-3xl font-black font-mono text-yellow-500 tracking-tighter drop-shadow-sm">
                                                         {formatCurrency(sp.currentHighestBid)}
                                                     </p>
                                                     {sp.currentHighestBidderCompany && (
-                                                        <p className="text-emerald-600 text-[10px] font-black uppercase tracking-widest mt-1 truncate">
-                                                            🏆 {sp.currentHighestBidderCompany}
+                                                        <p className="text-white text-xs font-black uppercase tracking-widest mt-1.5 truncate flex items-center gap-2">
+                                                            <Award className="w-4 h-4 text-yellow-500" /> {sp.currentHighestBidderCompany}
                                                         </p>
                                                     )}
                                                 </div>
 
                                                 {/* Winner row */}
-                                                <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
-                                                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Winner</span>
-                                                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest truncate ml-2">{sp.currentHighestBidder || '—'}</span>
+                                                <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-black/40 border border-white/10 backdrop-blur-sm">
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Owner</span>
+                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest truncate ml-2">
+                                                        {sp.currentHighestBidder || '—'}
+                                                    </span>
                                                 </div>
                                             </div>
                                         ))}
