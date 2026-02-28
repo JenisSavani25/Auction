@@ -9,11 +9,12 @@ import RevenueSummary from '../components/auction/RevenueSummary';
 import Leaderboard from '../components/auction/Leaderboard';
 import SponsorshipCard from '../components/auction/SponsorshipCard';
 import RecentBidsPanel from '../components/auction/RecentBidsPanel';
-import { LayoutGrid, Users, Gavel, BarChart3, ShieldCheck } from 'lucide-react';
+import AdminPendingBids from '../components/admin/AdminPendingBids';
+import { LayoutGrid, Users, Gavel, BarChart3, ShieldCheck, Inbox } from 'lucide-react';
 
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState('dashboard');
-    const { sponsorships } = useAuction();
+    const { sponsorships, pendingBids } = useAuction();
 
     const renderContent = () => {
         switch (activeTab) {
@@ -64,6 +65,8 @@ export default function AdminPage() {
                         </div>
                     </div>
                 );
+            case 'approvals':
+                return <div className="animate-in fade-in slide-in-from-bottom-6 duration-700"><AdminPendingBids /></div>;
             case 'sponsorships':
                 return <div className="animate-in fade-in slide-in-from-bottom-6 duration-700"><AdminSponsorshipManager /></div>;
             case 'users':
@@ -79,6 +82,7 @@ export default function AdminPage() {
 
     const tabs = [
         { id: 'dashboard', label: 'Monitor', Icon: LayoutGrid },
+        { id: 'approvals', label: 'Approvals', Icon: Inbox, alertCount: pendingBids?.length },
         { id: 'sponsorships', label: 'Auctions', Icon: Gavel },
         { id: 'teams', label: 'Teams', Icon: ShieldCheck },
         { id: 'users', label: 'Participants', Icon: Users },
@@ -92,17 +96,20 @@ export default function AdminPage() {
             {/* Premium Mobile Tab Bar */}
             <div className="md:hidden sticky top-16 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4">
                 <div className="flex gap-2 py-3 overflow-x-auto no-scrollbar">
-                    {tabs.map(({ id, label, Icon }) => (
+                    {tabs.map(({ id, label, Icon, alertCount }) => (
                         <button
                             key={id}
                             onClick={() => setActiveTab(id)}
-                            className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex-1 whitespace-nowrap ${activeTab === id
+                            className={`relative flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex-1 whitespace-nowrap ${activeTab === id
                                 ? 'bg-slate-900 text-white shadow-lg scale-[1.02]'
                                 : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800'
                                 }`}
                         >
                             <Icon className="w-4 h-4" />
                             {label}
+                            {alertCount > 0 && (
+                                <span className="absolute -top-1 -right-0 w-3 h-3 bg-amber-500 rounded-full border-2 border-white animate-pulse" />
+                            )}
                         </button>
                     ))}
                 </div>

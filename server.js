@@ -31,6 +31,7 @@ let state = {
     users: [...INITIAL_USERS],
     sponsorships: [...INITIAL_SPONSORSHIPS],
     recentBids: [],
+    pendingBids: [],
     winnerModal: null,
     teamAuction: {
         status: 'NOT_STARTED', // NOT_STARTED, ROUND_ACTIVE, ROUND_STOPPED, ASSIGNING, INAUGURATION
@@ -129,13 +130,12 @@ io.on('connection', (socket) => {
                 });
                 break;
             case 'PLACE_BID': {
-                // actingAs is set when a supporter places bid on behalf of a sponsor
-                const { sponsorshipId, bidAmount, bidder, bidderCompany, actingAs } = action;
+                const { sponsorshipId, bidAmount, bidder, bidderCompany, actingAs, bypassApproval } = action;
                 const effectiveBidder = actingAs ? actingAs.ownerName : bidder;
                 const effectiveBidderCompany = actingAs ? actingAs.companyName : bidderCompany;
                 const now = Date.now();
                 const bid = {
-                    id: `bid_${now}`,
+                    id: `bid_${now}_${Math.random().toString(36).substr(2, 5)}`,
                     sponsorshipId,
                     amount: bidAmount,
                     bidder: effectiveBidder,
@@ -144,19 +144,60 @@ io.on('connection', (socket) => {
                     timestamp: now,
                 };
 
-                state.sponsorships = state.sponsorships.map(sp => {
-                    if (sp.id !== sponsorshipId) return sp;
-                    const newEndTime = now + (sp.durationMinutes * 60 * 1000);
-                    return {
-                        ...sp,
-                        currentHighestBid: bidAmount,
-                        currentHighestBidder: effectiveBidder,
-                        currentHighestBidderCompany: effectiveBidderCompany,
-                        endTime: newEndTime,
-                        bids: [bid, ...sp.bids],
-                    };
-                });
-                state.recentBids = [bid, ...state.recentBids].slice(0, 50);
+                // If bypassApproval is true (e.g., admin placed it), approve it immediately
+                if (bypassApproval) {
+                    state.sponsorships = state.sponsorships.map(sp => {
+                        if (sp.id !== sponsorshipId) return sp;
+                        const newEndTime = now + (sp.durationMinutes * 60 * 1000);
+                        return {
+                            ...sp,
+                            currentHighestBid: bidAmount,
+                            currentHighestBidder: effectiveBidder,
+                            currentHighestBidderCompany: effectiveBidderCompany,
+                            endTime: newEndTime,
+                            bids: [bid, ...sp.bids],
+                        };
+                    });
+                    state.recentBids = [bid, ...state.recentBids].slice(0, 50);
+                } else {
+                    // Otherwise, queue it for admin approval
+                    state.pendingBids.push(bid);
+                }
+                break;
+            }
+            case 'APPROVE_BID': {
+                const bidToApprove = state.pendingBids.find(b => b.id === action.bidId);
+                if (bidToApprove) {
+                    // Remove from pending
+                    state.pendingBids = state.pendingBids.filter(b => b.id !== action.bidId);
+
+                    // Add to live
+                    state.sponsorships = state.sponsorships.map(sp => {
+                        if (sp.id !== bidToApprove.sponsorshipId) return sp;
+                        // Only approve if the bid is still strictly valid (higher than current)
+                        // It's possible multiple pending bids existed and a higher one was already approved
+                        if (bidToApprove.amount >= (sp.currentHighestBid || sp.basePrice)) {
+                            const now = Date.now();
+                            const newEndTime = now + (sp.durationMinutes * 60 * 1000);
+                            return {
+                                ...sp,
+                                currentHighestBid: bidToApprove.amount,
+                                currentHighestBidder: bidToApprove.bidder,
+                                currentHighestBidderCompany: bidToApprove.bidderCompany,
+                                endTime: newEndTime,
+                                bids: [bidToApprove, ...sp.bids],
+                            };
+                        }
+                        return sp;
+                    });
+
+                    // Add to recent if it was successfully applied (we don't strictly check here, just add to stream)
+                    state.recentBids = [bidToApprove, ...state.recentBids].slice(0, 50);
+                }
+                break;
+            }
+            case 'REJECT_BID': {
+                state.pendingBids = state.pendingBids.filter(b => b.id !== action.bidId);
                 break;
             }
             case 'ALLOT_AUCTION': {
@@ -284,6 +325,7 @@ async function startServer() {
             const savedDoc = await globalStateCollection.findOne({ _id: 'global_state' });
             if (savedDoc && savedDoc.state) {
                 state = savedDoc.state;
+                if (!state.pendingBids) state.pendingBids = []; // Ensure backwards compatibility with old DB docs
                 // Ensure admin and dashboard users always exist
                 const hasAdmin = state.users.some(u => u.id === 'admin');
                 const hasDashboard = state.users.some(u => u.id === 'dashboard');

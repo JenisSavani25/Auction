@@ -77,11 +77,20 @@ export function AuctionProvider({ children }) {
     const startAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'START_AUCTION', sponsorshipId }), [dispatchAction]);
     const allotAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'ALLOT_AUCTION', sponsorshipId }), [dispatchAction]);
     const rejectAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'REJECT_AUCTION', sponsorshipId }), [dispatchAction]);
-    const placeBid = useCallback((sponsorshipId, bidAmount, bidder, bidderCompany) =>
-        dispatchAction({ type: 'PLACE_BID', sponsorshipId, bidAmount, bidder, bidderCompany }), [dispatchAction]);
+    const placeBid = useCallback((sponsorshipId, bidAmount, bidder, bidderCompany) => {
+        const bypassApproval = currentUser?.role === 'admin';
+        dispatchAction({ type: 'PLACE_BID', sponsorshipId, bidAmount, bidder, bidderCompany, bypassApproval });
+    }, [dispatchAction, currentUser]);
+
     // Supporter version: places bid credited to the sponsor (actingAs)
-    const placeBidAs = useCallback((sponsorshipId, bidAmount, actingAs) =>
-        dispatchAction({ type: 'PLACE_BID', sponsorshipId, bidAmount, bidder: null, bidderCompany: null, actingAs }), [dispatchAction]);
+    const placeBidAs = useCallback((sponsorshipId, bidAmount, actingAs) => {
+        const bypassApproval = currentUser?.role === 'admin';
+        dispatchAction({ type: 'PLACE_BID', sponsorshipId, bidAmount, bidder: null, bidderCompany: null, actingAs, bypassApproval });
+    }, [dispatchAction, currentUser]);
+
+    const approveBid = useCallback((bidId) => dispatchAction({ type: 'APPROVE_BID', bidId }), [dispatchAction]);
+    const rejectBid = useCallback((bidId) => dispatchAction({ type: 'REJECT_BID', bidId }), [dispatchAction]);
+
     const closeWinnerModal = useCallback(() => dispatchAction({ type: 'CLOSE_WINNER_MODAL' }), [dispatchAction]);
     const reopenAuction = useCallback((sponsorshipId) => dispatchAction({ type: 'REOPEN_AUCTION', sponsorshipId }), [dispatchAction]);
     const extendTimer = useCallback((sponsorshipId, minutes) => dispatchAction({ type: 'EXTEND_TIMER', sponsorshipId, minutes }), [dispatchAction]);
@@ -137,6 +146,7 @@ export function AuctionProvider({ children }) {
         currentUser,
         loginError,
         leaderboard,
+        pendingBids: globalState.pendingBids || [],
         login,
         logout,
         clearLoginError,
@@ -149,6 +159,8 @@ export function AuctionProvider({ children }) {
         rejectAuction,
         placeBid,
         placeBidAs,
+        approveBid,
+        rejectBid,
         closeWinnerModal,
         reopenAuction,
         extendTimer,

@@ -4,7 +4,7 @@ import { Gavel, ChevronDown, LogOut, User, Radio, Shield, LayoutGrid, ShieldChec
 import { getInitials } from '../../utils/helpers';
 
 export default function Navbar({ onTabChange, activeTab, userRoleProp }) {
-    const { currentUser, sponsorships, logout } = useAuction();
+    const { currentUser, sponsorships, pendingBids = [], logout } = useAuction();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -39,16 +39,22 @@ export default function Navbar({ onTabChange, activeTab, userRoleProp }) {
                 {onTabChange && (
                     <div className="hidden md:flex items-center gap-1 bg-slate-100/50 rounded-2xl p-1 border border-slate-200/50">
                         {currentUser?.role === 'admin' ? (
-                            ['dashboard', 'sponsorships', 'teams', 'users', 'analytics'].map((tab) => (
+                            ['dashboard', 'approvals', 'sponsorships', 'teams', 'users', 'analytics'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => onTabChange(tab)}
-                                    className={`px-5 py-2 rounded-xl text-xs font-black transition-all duration-300 capitalize tracking-wide ${activeTab === tab
+                                    className={`relative px-5 py-2 rounded-xl text-xs font-black transition-all duration-300 capitalize tracking-wide ${activeTab === tab
                                         ? 'bg-blue-700 text-white shadow-lg shadow-blue-700/20'
                                         : 'text-slate-500 hover:text-slate-900 hover:bg-white'
                                         }`}
                                 >
                                     {tab === 'teams' ? 'Teams Bid' : tab}
+                                    {tab === 'approvals' && pendingBids?.length > 0 && (
+                                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500 border-2 border-white"></span>
+                                        </span>
+                                    )}
                                 </button>
                             ))
                         ) : (
