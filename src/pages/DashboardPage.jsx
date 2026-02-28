@@ -282,7 +282,7 @@ const DashboardPage = () => {
                                                                 <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest truncate">{bid.bidder}</p>
                                                             </div>
                                                             <div className="text-right flex-shrink-0">
-                                                                <p className="text-blue-700 text-xs font-black font-mono">₹{bid.amount.toLocaleString()}</p>
+                                                                <p className="text-blue-700 text-xs font-black font-mono">{bid.amount.toLocaleString()}</p>
                                                                 <p className="text-slate-400 text-[9px] font-black uppercase">{timeAgo(bid.timestamp)}</p>
                                                             </div>
                                                         </div>

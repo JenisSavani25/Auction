@@ -4,8 +4,7 @@
 export function formatCurrency(amount) {
     if (!amount && amount !== 0) return '—';
     return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
+        style: 'decimal',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
     }).format(amount);

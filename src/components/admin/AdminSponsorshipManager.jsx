@@ -50,7 +50,7 @@ function AdminSponsorshipRow({ sponsorship, expanded, setExpanded, confirmReopen
                             <TrendingUp className="w-3 h-3" /> {sponsorship.bids.length} Bids
                         </p>
                         <span className="h-1 w-1 rounded-full bg-slate-300" />
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Res: ₹{sponsorship.basePrice.toLocaleString()}</p>
+                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Res: {sponsorship.basePrice.toLocaleString()}</p>
                     </div>
                 </div>
 
@@ -69,7 +69,7 @@ function AdminSponsorshipRow({ sponsorship, expanded, setExpanded, confirmReopen
                     <div className="text-right">
                         <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest leading-none mb-1">Current Bid</p>
                         <p className="text-2xl font-black font-mono text-blue-700 tracking-tighter">
-                            ₹{sponsorship.currentHighestBid?.toLocaleString() || sponsorship.basePrice.toLocaleString()}
+                            {sponsorship.currentHighestBid?.toLocaleString() || sponsorship.basePrice.toLocaleString()}
                         </p>
                     </div>
 
@@ -186,7 +186,7 @@ function AdminSponsorshipRow({ sponsorship, expanded, setExpanded, confirmReopen
                                                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{new Date(bid.timestamp).toLocaleTimeString()}</p>
                                                     </div>
                                                 </div>
-                                                <p className="font-mono font-black text-blue-600 text-sm">₹{bid.amount.toLocaleString()}</p>
+                                                <p className="font-mono font-black text-blue-600 text-sm">{bid.amount.toLocaleString()}</p>
                                             </div>
                                         ))
                                     ) : (
@@ -336,7 +336,7 @@ export default function AdminSponsorshipManager() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest px-2">Reserve Price (₹)</label>
+                                        <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest px-2">Reserve Price</label>
                                         <input
                                             type="number"
                                             value={form.basePrice}

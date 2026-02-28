@@ -68,9 +68,9 @@ export default function AdminTeamAuction() {
                         {(teamAuction.status === 'NOT_STARTED' || teamAuction.status === 'ROUND_STOPPED') && (
                             <div className="space-y-8 animate-in zoom-in-95 duration-500">
                                 <div className="space-y-3">
-                                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Next Round Price (₹)</label>
+                                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Next Round Price</label>
                                     <div className="flex items-center gap-4">
-                                        <span className="text-4xl lg:text-6xl font-black text-slate-300">₹</span>
+                                        <span className="text-4xl lg:text-6xl font-black text-slate-300"></span>
                                         <input
                                             type="number"
                                             value={newPrice}
